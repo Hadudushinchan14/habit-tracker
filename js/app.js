@@ -1,31 +1,3 @@
-let State = {
-
-    profile: {
-        identity: null
-    },
-
-    actions: [
-        {
-            id: 1,
-            title: "Drink Water",
-            subtitle: "Stay hydrated.",
-            completed: false
-        },
-        {
-            id: 2,
-            title: "Walk 20 Minutes",
-            subtitle: "Movement builds momentum.",
-            completed: false
-        }
-    ],
-
-    reflections: [],
-
-    history: []
-
-};
-
-
 const App = {
 
     currentPage: "today",
@@ -44,20 +16,8 @@ const App = {
     }
 
 
-    document.getElementById("app").innerHTML = `
-<div style="
-position:fixed;
-top:20px;
-right:20px;
-background:red;
-color:white;
-padding:15px;
-z-index:9999;
-border-radius:10px;
-font-size:20px;
-">
-CLOUD TEST 3 🚀
-</div>
+    document.getElementById("app").innerHTML =
+    Pages[this.currentPage]();
 
 ${Pages[this.currentPage]()}
 `;
