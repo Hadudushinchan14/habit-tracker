@@ -162,3 +162,100 @@ max-width:420px;
     background: #f8fafc;
 
 }
+
+.identity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+
+.identity-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 18px 20px;
+
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(18px);
+
+    border: 1px solid rgba(37,99,235,0.12);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 8px 24px rgba(15,23,42,0.06);
+
+    cursor: pointer;
+
+    transition: all .2s ease;
+}
+
+
+.identity-option:hover {
+
+    transform: translateY(-2px);
+
+    border-color: #2563EB;
+
+}
+
+
+.identity-option > div:first-child {
+
+    flex: 1;
+
+    font-size: 17px;
+
+    font-weight: 600;
+
+    color: #111827;
+
+}
+
+
+.identity-option button {
+
+    width: 38px;
+    height: 38px;
+
+    border-radius: 12px;
+
+    border: none;
+
+    margin-left: 8px;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+    background: #F1F5F9;
+
+    transition: .2s;
+
+}
+
+
+.identity-option button:hover {
+
+    background: #DBEAFE;
+
+}
+
+
+/* Add Identity */
+
+.identity-option:last-child {
+
+    justify-content: center;
+
+    color: #2563EB;
+
+    font-weight: 700;
+
+    background: #DBEAFE;
+
+    border: 1px dashed #2563EB;
+
+}

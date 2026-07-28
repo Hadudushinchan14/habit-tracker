@@ -5,7 +5,7 @@ const App = {
     render() {
 
     
-    if(!State.profile.identity){
+    if(!State.currentIdentityId){
 
     document.getElementById("app").innerHTML =
         Pages.onboarding();
@@ -24,6 +24,13 @@ const App = {
     navigate(page) {
         this.currentPage = page;
         this.render();
+    },
+
+    changeIdentity() {
+
+    document.getElementById("app").innerHTML =
+    Pages.onboarding();
+
     },
 
 
@@ -83,9 +90,35 @@ const App = {
 
      },
 
-    openSheet() {
+     openSheet(id = null) {
+
+    State.editingActionId = id;
 
     const sheet = document.getElementById("addSheet");
+
+    if (id) {
+
+        const action = State.actions.find(a => a.id === id);
+
+        document.getElementById("actionTitle").value =
+            action.title;
+
+        document.getElementById("actionSubtitle").value =
+            action.subtitle || "";
+
+        document.getElementById("deleteAction").style.display =
+            "block";
+
+    } else {
+
+        document.getElementById("actionTitle").value = "";
+
+        document.getElementById("actionSubtitle").value = "";
+
+        document.getElementById("deleteAction").style.display =
+            "none";
+
+    }
 
     sheet.classList.remove("hidden");
 
@@ -121,19 +154,65 @@ closeSheet() {
 
     if (!title) return;
 
+    if (State.editingActionId) {
+
     const { error } = await supabaseClient
         .from("actions")
-        .insert({
-            profile_id: State.profile.id,
-            title: title,
-            subtitle: subtitle,
-            completed: false
-        });
+        .update({
+            title,
+            subtitle
+        })
+        .eq("id", State.editingActionId);
 
     if (error) {
         console.error(error);
         return;
     }
+
+} else {
+
+    const { error } = await supabaseClient
+         .from("actions")
+         .insert({
+         profile_id: State.profile.id,
+         title: title,
+         subtitle: subtitle,
+         completed: false,
+         identity_id: State.currentIdentityId
+});
+        
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+}
+    State.editingActionId = null;
+
+    await Database.loadActions();
+
+    this.closeSheet();
+
+    this.render();
+
+    },
+
+    async deleteAction() {
+
+    if (!State.editingActionId) return;
+
+    const { error } = await supabaseClient
+        .from("actions")
+        .delete()
+        .eq("id", State.editingActionId);
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    State.editingActionId = null;
 
     await Database.loadActions();
 
@@ -172,18 +251,132 @@ closeSheet() {
 
     },
 
-    async chooseIdentity(identity) {
+    async createIdentity() {
 
-    await supabaseClient
-        .from("profiles")
-        .update({
-            identity
+    const name = prompt("Identity name:");
+
+    if (!name) return;
+
+
+    const { data, error } = await supabaseClient
+        .from("identities")
+        .insert({
+            profile_id: State.profile.id,
+            name: name
         })
-        .eq("id", State.profile.id);
+        .select()
+        .single();
 
-    State.profile.identity = identity;
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+
+    State.identities.push(data);
+
+    State.currentIdentityId = data.id;
+    State.profile.identity = data.name;
+
+    await Database.loadActions();
 
     this.navigate("today");
+
+    },
+
+    async chooseIdentity(identityId) {
+
+        const identity = State.identities.find(
+        i => i.id === identityId
+    );
+
+         if (!identity) return;
+
+    State.currentIdentityId = identity.id;
+
+    State.profile.identity = identity.name;
+
+    await Database.loadActions();
+
+    this.navigate("today");
+
+    
+    },
+
+    async editIdentity(identityId) {
+
+        const identity = State.identities.find(
+        i => i.id === identityId
+    );
+
+          if (!identity) return;
+
+    const name = prompt(
+        "Edit identity name:",
+        identity.name
+    );
+
+    if (!name || name === identity.name) return;
+
+
+    const { error } = await supabaseClient
+        .from("identities")
+        .update({
+            name
+        })
+        .eq("id", identityId);
+
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+
+    await Database.loadIdentities();
+
+    this.render();
+
+    },
+
+
+async deleteIdentity(identityId) {
+
+    const identity = State.identities.find(
+        i => i.id === identityId
+    );
+
+    if (!identity) return;
+
+
+    const confirmDelete = confirm(
+        `Delete "${identity.name}"?`
+    );
+
+    if (!confirmDelete) return;
+
+
+    const { error } = await supabaseClient
+        .from("identities")
+        .delete()
+        .eq("id", identityId);
+
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+
+    if (State.currentIdentityId === identityId) {
+        State.currentIdentityId = null;
+    }
+
+
+    await Database.loadIdentities();
+
+    this.render();
 
     },
 
@@ -242,21 +435,21 @@ closeSheet() {
     }
 };
 
+ 
 (async () => {
 
-    const { data } =
-        await supabaseClient.auth.getSession();
+    const {
+        data: { session }
+    } = await supabaseClient.auth.getSession();
 
-
-    if(!data.session){
+    if (!session) {
 
         document.getElementById("app").innerHTML =
-        UI.loginPage();
+            UI.loginPage();
 
         return;
 
     }
-
 
     await Database.init();
 

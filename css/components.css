@@ -88,27 +88,7 @@ transform:translateY(-2px);
 
 /* ---------- Action Card ---------- */
 
-.action-card{
 
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-background:var(--surface);
-
-padding:22px;
-
-margin-top:18px;
-
-border-radius:20px;
-
-border:1px solid var(--border);
-
-box-shadow:var(--shadow);
-
-}
 
 .action-card h3{
 
@@ -854,5 +834,118 @@ font-weight:700;
     background:#F1F5F9;
 
     border-radius:14px;
+
+}
+
+.action-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+
+    background: rgba(255, 255, 255, 0.72);
+
+    border: 1px solid #DBEAFE;
+
+    border-radius: 20px;
+
+    padding: 18px;
+
+    backdrop-filter: blur(18px);
+
+    box-shadow: 
+        0 8px 24px rgba(37, 99, 235, 0.08);
+}
+
+.action-card > div:first-child {
+    flex: 1;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    margin-top: 0;
+}
+
+.edit-button {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+
+    border: 1px solid #DBEAFE;
+    background: rgba(255,255,255,0.72);
+
+    color: #2563EB;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 16px;
+
+    transition: all .2s ease;
+}
+
+.edit-button:hover {
+    background: #DBEAFE;
+    transform: translateY(-1px);
+}
+
+
+.danger-button {
+
+    width: 100%;
+
+    border: none;
+
+    background: #FEE2E2;
+
+    color: #DC2626;
+
+    padding: 12px;
+
+    border-radius: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+
+}
+
+.danger-button:hover {
+
+    background: #FECACA;
+
+}
+
+.secondary-button {
+
+    background: #DBEAFE;
+
+    color: #2563EB;
+
+    border: 1px solid #BFDBFE;
+
+    padding: 12px 18px;
+
+    border-radius: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+
+}
+
+.secondary-button:hover {
+
+    background: #BFDBFE;
 
 }

@@ -8,11 +8,16 @@ async function getUser() {
     const { data } =
         await supabaseClient.auth.getUser();
 
-    if (data.user) {
-        return data.user;
+    if (!data.user) {
+        return null;
     }
 
-    return null;
+    if (!data.user.email) {
+        await supabaseClient.auth.signOut();
+        return null;
+    }
+
+    return data.user;
 
 }
 
@@ -21,6 +26,10 @@ async function getProfile() {
     const user = await getUser();
 
     if (!user) return null;
+
+    if (!user.email) {
+    return null;
+}
 
     let { data: profile } = await supabaseClient
         .from("profiles")
@@ -55,6 +64,7 @@ async function getProfile() {
 
 async function login(email, password) {
 
+    console.log("LOGIN CALLED", email, password);
     const { data, error } =
         await supabaseClient.auth.signInWithPassword({
             email,
@@ -62,6 +72,7 @@ async function login(email, password) {
         });
 
     if (error) {
+        alert(error.message);
         console.error(error);
         return null;
     }
@@ -71,7 +82,7 @@ async function login(email, password) {
 }
 
 
-async function signup(email, password) {
+async function createAccount(email, password) {
 
     const { data, error } =
         await supabaseClient.auth.signUp({
@@ -80,11 +91,33 @@ async function signup(email, password) {
         });
 
     if (error) {
+        console.error("SIGNUP ERROR:", error);
+        return null;
+    }
+
+    console.log("SIGNUP SUCCESS:", data);
+
+    return data.user;
+
+}
+
+async function loginWithGoogle() {
+
+    const { data, error } =
+        await supabaseClient.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+
+
+    if (error) {
         console.error(error);
         return null;
     }
 
-    return data.user;
+    return data;
 
 }
 
@@ -92,5 +125,5 @@ async function signup(email, password) {
 window.getProfile = getProfile;
 window.supabaseClient = supabaseClient;
 window.login = login;
-window.signup = signup;
+window.createAccount = createAccount;
 window.loginWithGoogle = loginWithGoogle;

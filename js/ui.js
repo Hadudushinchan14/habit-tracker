@@ -66,6 +66,13 @@ const UI = {
 
             </div>
 
+            <button
+            class="edit-button"
+            onclick="App.openSheet(${id})"
+            >
+            ✏️
+            </button>
+
            <button
             class="vote-button ${completed ? "completed" : ""}"
             onclick="App.toggleAction(${id})"
@@ -258,6 +265,16 @@ const UI = {
                 Save
             </button>
 
+              <button
+        id="deleteAction"
+        class="danger-button"
+        type="button"
+        onclick="App.deleteAction()"
+        style="display:none;"
+            >
+             Delete
+            </button>
+
             <button
                 class="secondary-button"
                 onclick="App.closeSheet()"
@@ -436,45 +453,56 @@ Create Account
 
     },
 
-    async login(){
+   async login() {
 
-const email =
-document.getElementById("loginEmail").value;
+    const email =
+        document.getElementById("loginEmail").value.trim();
 
-const password =
-document.getElementById("loginPassword").value;
+    const password =
+        document.getElementById("loginPassword").value.trim();
 
+    if (!email || !password) {
+        UI.showToast("Enter email and password.");
+        return;
+    }
 
-const user = await login(email,password);
+    const user = await window.login(email, password);
 
-if(user){
-
-location.reload();
-
-}
+    if (user) {
+        location.reload();
+    }
 
 },
 
 
-async signup(){
 
-const email =
-document.getElementById("loginEmail").value;
+async signup() {
 
-const password =
-document.getElementById("loginPassword").value;
+    const email =
+        document.getElementById("loginEmail").value.trim();
 
+    const password =
+        document.getElementById("loginPassword").value.trim();
 
-const user = await signup(email,password);
+    console.log({ email, password });
 
-if(user){
+    if (!email) {
+        UI.showToast("Enter your email.");
+        return;
+    }
 
-location.reload();
+    if (!password) {
+        UI.showToast("Enter your password.");
+        return;
+    }
+
+    const user = await createAccount(email, password);
+
+    if (user) {
+        UI.showToast("Account created. Check your email.");
+    }
 
 }
-
-    },
-
 
 
 

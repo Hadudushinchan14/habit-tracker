@@ -23,6 +23,13 @@ const Pages = {
             </div>
 
             ${UI.identityCard(State.profile.identity)}
+            <button 
+                class="secondary-button"
+                onclick="App.changeIdentity()"
+            >
+                Change Identity
+            </button>
+
             ${UI.progressRing(
             State.actions.filter(a => a.completed).length,
             State.actions.length
@@ -315,39 +322,33 @@ const Pages = {
         </div>
 
 
-        <div class="identity-option"
-        onclick="App.chooseIdentity('A Healthier Person')">
+        ${State.identities.map(identity => `
 
-            🌱 A Healthier Person
+<div class="identity-option">
 
-        </div>
-
-
-        <div class="identity-option"
-        onclick="App.chooseIdentity('A Disciplined Person')">
-
-            🔥 A Disciplined Person
-
-        </div>
-
-
-        <div class="identity-option"
-        onclick="App.chooseIdentity('A Focused Creator')">
-
-            🚀 A Focused Creator
-
-        </div>
-
-
-        <div class="identity-option"
-        onclick="App.chooseIdentity('Custom')">
-
-            ✨ My Own Identity
-
-        </div>
-
-
+    <div onclick="App.chooseIdentity('${identity.id}')">
+        ${identity.name}
     </div>
+
+    <button onclick="App.editIdentity('${identity.id}')">
+        ✏️
+    </button>
+
+    <button onclick="App.deleteIdentity('${identity.id}')">
+        🗑️
+    </button>
+
+</div>
+
+`).join("")}
+
+
+<div class="identity-option"
+onclick="App.createIdentity()">
+
+    ✨ Add Identity
+
+</div>
 
     `;
 
@@ -389,3 +390,5 @@ const Pages = {
     
 
 };
+
+window.Pages = Pages;

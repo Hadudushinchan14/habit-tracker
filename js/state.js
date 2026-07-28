@@ -7,11 +7,19 @@ const State = {
 
     actions: [],
 
+    identities: [],
+
+    currentIdentityId: null,
+
     history: [],
 
-    reflections: []
+    reflections: [],
+
+     editingActionId: null
 
 };
+
+    window.State = State;
 
 const Helpers = {
 
