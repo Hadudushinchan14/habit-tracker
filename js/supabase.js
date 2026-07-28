@@ -5,24 +5,14 @@ const supabaseClient = window.supabase.createClient(
 
 async function getUser() {
 
-    let { data } = await supabaseClient.auth.getUser();
+    const { data } =
+        await supabaseClient.auth.getUser();
 
     if (data.user) {
         return data.user;
     }
 
-
-    const { data: authData, error } =
-        await supabaseClient.auth.signInAnonymously();
-
-
-    if (error) {
-        console.error(error);
-        return null;
-    }
-
-
-    return authData.user;
+    return null;
 
 }
 
@@ -43,9 +33,10 @@ async function getProfile() {
         const { data, error } = await supabaseClient
             .from("profiles")
             .insert({
-                user_id: user.id,
-                identity: null
-            })
+            user_id: user.id,
+            email: user.email,
+            identity: null
+        })
             .select()
             .single();
 
