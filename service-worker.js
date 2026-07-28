@@ -1,4 +1,4 @@
-const CACHE_NAME = "identity-os-v6";
+const CACHE_NAME = "identity-os-v1.7";
 
 
 const FILES = [
@@ -19,7 +19,9 @@ const FILES = [
     "./js/database.js",
     "./js/ui.js",
     "./js/pages.js",
-    "./js/app.js"
+    "./js/app.js",
+    "/icon-192.png",
+    "/icon-512.png"
 
 ];
 
