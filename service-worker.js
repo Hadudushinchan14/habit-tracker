@@ -1,4 +1,4 @@
-const CACHE_NAME = "identity-os-v3";
+const CACHE_NAME = "identity-os-v4";
 
 
 const FILES = [
@@ -26,6 +26,8 @@ self.addEventListener(
 "install",
 event => {
 
+    self.skipWaiting();
+
     event.waitUntil(
 
         caches.open(CACHE_NAME)
@@ -33,6 +35,16 @@ event => {
             cache.addAll(FILES)
         )
 
+    );
+
+});
+
+    self.addEventListener(
+"activate",
+event => {
+
+    event.waitUntil(
+        self.clients.claim()
     );
 
 });
