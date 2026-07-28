@@ -4,8 +4,7 @@ const App = {
 
     render() {
 
-    Storage.save(State);
-
+    
     if(!State.profile.identity){
 
     document.getElementById("app").innerHTML =
@@ -19,8 +18,6 @@ const App = {
     document.getElementById("app").innerHTML =
     Pages[this.currentPage]();
 
-${Pages[this.currentPage]()}
-`;
 
     },
 
@@ -82,12 +79,9 @@ ${Pages[this.currentPage]()}
     }
 
 
-    Storage.save(State);
+       this.render();
 
-
-    this.render();
-
-    },
+     },
 
     openSheet() {
 
@@ -113,7 +107,7 @@ closeSheet() {
 
     },
 
-    saveAction() {
+   async saveAction() {
 
     const title = document
         .getElementById("actionTitle")
@@ -127,17 +121,21 @@ closeSheet() {
 
     if (!title) return;
 
-    State.actions.push({
+    const { error } = await supabaseClient
+        .from("actions")
+        .insert({
+            profile_id: State.profile.id,
+            title: title,
+            subtitle: subtitle,
+            completed: false
+        });
 
-        id: Date.now(),
+    if (error) {
+        console.error(error);
+        return;
+    }
 
-        title,
-
-        subtitle,
-
-        completed: false
-
-    });
+    await Database.loadActions();
 
     this.closeSheet();
 
@@ -166,9 +164,7 @@ closeSheet() {
     State.reflections.push(reflection);
 
 
-    Storage.save(State);
-
-
+   
     UI.showToast(
         "Reflection saved 🌱"
     );
@@ -176,11 +172,16 @@ closeSheet() {
 
     },
 
-    chooseIdentity(identity){
+    async chooseIdentity(identity) {
+
+    await supabaseClient
+        .from("profiles")
+        .update({
+            identity
+        })
+        .eq("id", State.profile.id);
 
     State.profile.identity = identity;
-
-    Storage.save(State);
 
     this.navigate("today");
 
@@ -241,4 +242,10 @@ closeSheet() {
     }
 };
 
-App.render();
+(async () => {
+
+    await Database.init();
+
+    App.render();
+
+})();

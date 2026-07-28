@@ -252,6 +252,7 @@ const UI = {
 
             <button
                 class="primary-button"
+                type="button"
                 onclick="App.saveAction()"
             >
                 Save

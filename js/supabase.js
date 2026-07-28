@@ -25,3 +25,42 @@ async function getUser() {
     return authData.user;
 
 }
+
+async function getProfile() {
+
+    const user = await getUser();
+
+    if (!user) return null;
+
+    let { data: profile } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (!profile) {
+
+        const { data, error } = await supabaseClient
+            .from("profiles")
+            .insert({
+                user_id: user.id,
+                identity: null
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error(error);
+            return null;
+        }
+
+        profile = data;
+    }
+
+    return profile;
+
+  
+}
+
+    window.getProfile = getProfile;
+    window.supabaseClient = supabaseClient;

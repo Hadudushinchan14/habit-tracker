@@ -14,7 +14,9 @@ const FILES = [
     "./css/components.css",
     "./css/pages.css",
 
-    "./js/storage.js",
+    "./js/supabase.js",
+    "./js/state.js",
+    "./js/database.js",
     "./js/ui.js",
     "./js/pages.js",
     "./js/app.js"
@@ -50,15 +52,20 @@ event => {
 });
 
 
-self.addEventListener(
-"fetch",
-event => {
+self.addEventListener("fetch", event => {
+
+    const url = new URL(event.request.url);
+
+    // Never cache Supabase requests
+    if (url.hostname.endsWith(".supabase.co")) {
+        event.respondWith(fetch(event.request));
+        return;
+    }
 
     event.respondWith(
-
-        fetch(event.request)
-        .catch(() => caches.match(event.request))
-
+        caches.match(event.request).then(response => {
+            return response || fetch(event.request);
+        })
     );
 
 });
