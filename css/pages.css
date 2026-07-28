@@ -29,3 +29,136 @@ font-size:1.05rem;
 max-width:420px;
 
 }
+
+.login-page {
+
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    padding: 30px;
+
+    background:
+    linear-gradient(
+        180deg,
+        #ffffff 0%,
+        #eff6ff 100%
+    );
+
+}
+
+
+.login-page h1 {
+
+    font-size: 32px;
+    font-weight: 700;
+
+    color: #111827;
+
+    margin-bottom: 30px;
+
+}
+
+
+.login-page input {
+
+    width: 100%;
+    max-width: 360px;
+
+    padding: 16px 18px;
+
+    margin-bottom: 14px;
+
+    border-radius: 14px;
+
+    border: 1px solid #dbeafe;
+
+    background:
+    rgba(255,255,255,.75);
+
+    backdrop-filter: blur(18px);
+
+    font-size: 16px;
+
+    outline: none;
+
+}
+
+
+.login-page input:focus {
+
+    border-color: #2563EB;
+
+    box-shadow:
+    0 0 0 4px rgba(37,99,235,.12);
+
+}
+
+
+.login-page button {
+
+    width: 100%;
+    max-width: 360px;
+
+    padding: 16px;
+
+    margin-top: 10px;
+
+    border-radius: 14px;
+
+    border: none;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+}
+
+
+.login-page button:first-of-type {
+
+    background: #2563EB;
+
+    color: white;
+
+}
+
+
+.login-page button:last-of-type {
+
+    background: white;
+
+    color: #2563EB;
+
+    border: 1px solid #DBEAFE;
+
+}
+
+.google-btn {
+
+    background: white;
+
+    color: #111827;
+
+    border: 1px solid #dbeafe !important;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+.google-btn:hover {
+
+    background: #f8fafc;
+
+}

@@ -244,6 +244,20 @@ closeSheet() {
 
 (async () => {
 
+    const { data } =
+        await supabaseClient.auth.getSession();
+
+
+    if(!data.session){
+
+        document.getElementById("app").innerHTML =
+        UI.loginPage();
+
+        return;
+
+    }
+
+
     await Database.init();
 
     App.render();

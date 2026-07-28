@@ -57,10 +57,49 @@ async function getProfile() {
         profile = data;
     }
 
-    return profile;
+            return profile;
 
-  
 }
 
-    window.getProfile = getProfile;
-    window.supabaseClient = supabaseClient;
+
+async function login(email, password) {
+
+    const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+        });
+
+    if (error) {
+        console.error(error);
+        return null;
+    }
+
+    return data.user;
+
+}
+
+
+async function signup(email, password) {
+
+    const { data, error } =
+        await supabaseClient.auth.signUp({
+            email,
+            password
+        });
+
+    if (error) {
+        console.error(error);
+        return null;
+    }
+
+    return data.user;
+
+}
+
+
+window.getProfile = getProfile;
+window.supabaseClient = supabaseClient;
+window.login = login;
+window.signup = signup;
+window.loginWithGoogle = loginWithGoogle;

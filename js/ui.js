@@ -402,5 +402,81 @@ const UI = {
 
     },
 
+        loginPage() {
+
+return `
+
+<div class="login-page">
+
+<h1>Atomic Habit Tracker</h1>
+
+<input id="loginEmail" placeholder="Email">
+
+<input 
+id="loginPassword"
+type="password"
+placeholder="Password"
+>
+
+<button onclick="UI.login()">
+Login
+</button>
+
+<button onclick="UI.signup()">
+Create Account
+</button>
+
+<button onclick="loginWithGoogle()" class="google-btn">
+    Continue with Google
+</button>
+
+</div>
+
+`;
+
+    },
+
+    async login(){
+
+const email =
+document.getElementById("loginEmail").value;
+
+const password =
+document.getElementById("loginPassword").value;
+
+
+const user = await login(email,password);
+
+if(user){
+
+location.reload();
+
+}
+
+},
+
+
+async signup(){
+
+const email =
+document.getElementById("loginEmail").value;
+
+const password =
+document.getElementById("loginPassword").value;
+
+
+const user = await signup(email,password);
+
+if(user){
+
+location.reload();
+
+}
+
+    },
+
+
+
+
 };
 
