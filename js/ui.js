@@ -81,7 +81,7 @@ const UI = {
 
     },
 
-    bottomNav(active = "today") {
+    bottomNav(active = "Daily") {
 
     const items = [
 
@@ -94,7 +94,7 @@ const UI = {
         {
             id:"journal",
             icon:"📖",
-            label:"Journal"
+            label:"Diary"
         },
 
         {
