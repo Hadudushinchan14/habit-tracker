@@ -56,16 +56,14 @@ self.addEventListener("fetch", event => {
 
     const url = new URL(event.request.url);
 
-    // Never cache Supabase requests
     if (url.hostname.endsWith(".supabase.co")) {
         event.respondWith(fetch(event.request));
         return;
     }
 
     event.respondWith(
-        caches.match(event.request).then(response => {
-            return response || fetch(event.request);
-        })
+        fetch(event.request)
+        .catch(() => caches.match(event.request))
     );
 
 });
