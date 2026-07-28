@@ -1,3 +1,31 @@
+let State = {
+
+    profile: {
+        identity: null
+    },
+
+    actions: [
+        {
+            id: 1,
+            title: "Drink Water",
+            subtitle: "Stay hydrated.",
+            completed: false
+        },
+        {
+            id: 2,
+            title: "Walk 20 Minutes",
+            subtitle: "Movement builds momentum.",
+            completed: false
+        }
+    ],
+
+    reflections: [],
+
+    history: []
+
+};
+
+
 const App = {
 
     currentPage: "today",
