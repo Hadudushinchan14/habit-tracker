@@ -1,4 +1,4 @@
-const CACHE_NAME = "identity-os-v2";
+const CACHE_NAME = "identity-os-v3";
 
 
 const FILES = [
@@ -44,12 +44,8 @@ event => {
 
     event.respondWith(
 
-        caches.match(event.request)
-        .then(response => {
-
-            return response || fetch(event.request);
-
-        })
+        fetch(event.request)
+        .catch(() => caches.match(event.request))
 
     );
 
