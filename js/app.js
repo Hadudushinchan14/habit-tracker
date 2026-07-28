@@ -28,7 +28,7 @@ z-index:9999;
 border-radius:10px;
 font-size:20px;
 ">
-CLOUD TEST 🚀
+CLOUD TEST 2 🚀
 </div>
 
 ${Pages[this.currentPage]()}
