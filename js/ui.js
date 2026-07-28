@@ -88,7 +88,7 @@ const UI = {
         {
             id:"today",
             icon:"🏠",
-            label:"Daily"
+            label:"Today"
         },
 
         {
