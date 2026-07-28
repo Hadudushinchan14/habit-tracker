@@ -16,8 +16,23 @@ const App = {
     }
 
 
-    document.getElementById("app").innerHTML =
-    Pages[this.currentPage]();
+    document.getElementById("app").innerHTML = `
+<div style="
+position:fixed;
+top:20px;
+right:20px;
+background:red;
+color:white;
+padding:15px;
+z-index:9999;
+border-radius:10px;
+font-size:20px;
+">
+CLOUD TEST 🚀
+</div>
+
+${Pages[this.currentPage]()}
+`;
 
     },
 
