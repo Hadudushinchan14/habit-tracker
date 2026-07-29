@@ -54,17 +54,23 @@ State.currentIdentityId = null;
 
     },
 
-    async loadReflections() {
+   async loadReflections() {
 
-        const { data } = await supabaseClient
-            .from("reflections")
-            .select("*")
-            .eq("profile_id", State.profile.id);
+    const { data, error } = await supabaseClient
+        .from("reflections")
+        .select("*")
+        .eq("profile_id", State.profile.id)
+        .order("created_at", { ascending: false });
 
-        State.reflections = data || [];
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    State.reflections = data || [];
 
     },
-
+    
     async loadIdentities() {
 
     const { data, error } = await supabaseClient

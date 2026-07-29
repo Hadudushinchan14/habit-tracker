@@ -222,32 +222,30 @@ closeSheet() {
 
     },
 
-    saveReflection(){
+    async saveReflection() {
 
-    const reflection = {
+        const reflection = {
 
-        date:new Date().toISOString(),
+        profile_id: State.profile.id,
 
-        win:
-        document.getElementById("winReflection").value,
+        win: document.getElementById("winReflection").value,
 
-        challenge:
-        document.getElementById("challengeReflection").value,
+        challenge: document.getElementById("challengeReflection").value,
 
-        tomorrow:
-        document.getElementById("tomorrowReflection").value
+        tomorrow: document.getElementById("tomorrowReflection").value
 
     };
 
 
-    State.reflections.push(reflection);
+    await supabaseClient
+    .from("reflections")
+    .insert(reflection);
 
+    State.reflections.unshift(data);
 
-   
     UI.showToast(
         "Reflection saved 🌱"
     );
-
 
     },
 
@@ -435,7 +433,8 @@ async deleteIdentity(identityId) {
     }
 };
 
- 
+ window.App = App;
+
 (async () => {
 
     const {

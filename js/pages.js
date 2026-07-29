@@ -66,26 +66,7 @@ const Pages = {
 
     },
 
-    journal() {
-
-    return `
-
-    <div class="container">
-
-        <h1>Journal</h1>
-
-        <p>
-            Daily reflection coming soon.
-        </p>
-
-    </div>
-
-    ${UI.bottomNav("journal")}
-
-    `;
-
-    },
-
+  
     identity() {
 
     return `
