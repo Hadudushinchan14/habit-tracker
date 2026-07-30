@@ -2,23 +2,28 @@ const Database = {
 
     async init() {
 
-        const profile = await getProfile();
+    const profile = await getProfile();
 
-         if (!profile) {
+    if (!profile) {
         return null;
-        }
+    }
 
-State.profile.id = profile.id;
-State.profile.identity = null;
-State.currentIdentityId = null;
-        
-        await this.loadIdentities();
-        await this.loadActions();
-        await this.loadHistory();
-        await this.loadReflections();
+    State.profile.id = profile.id;
+    State.profile.identity = null;
+
+    await this.loadIdentities();
+
+    if (State.identities.length) {
+        State.currentIdentityId = State.identities[0].id;
+        State.profile.identity = State.identities[0].name;
+    }
+
+    await this.loadActions();
+    await this.loadHistory();
+    await this.loadReflections();
 
     },
-
+    
     async loadActions() {
 
     if (!State.currentIdentityId) {
@@ -48,7 +53,8 @@ State.currentIdentityId = null;
         const { data } = await supabaseClient
             .from("history")
             .select("*")
-            .eq("profile_id", State.profile.id);
+            .eq("profile_id", State.profile.id)
+            .eq("identity_id", State.currentIdentityId);
 
         State.history = data || [];
 
@@ -60,7 +66,7 @@ State.currentIdentityId = null;
         .from("reflections")
         .select("*")
         .eq("profile_id", State.profile.id)
-        .order("created_at", { ascending: false });
+        .eq("identity_id", State.currentIdentityId)
 
     if (error) {
         console.error(error);
@@ -70,7 +76,7 @@ State.currentIdentityId = null;
     State.reflections = data || [];
 
     },
-    
+
     async loadIdentities() {
 
     const { data, error } = await supabaseClient
@@ -89,3 +95,5 @@ State.currentIdentityId = null;
     }
 
 };
+
+window.Database = Database;

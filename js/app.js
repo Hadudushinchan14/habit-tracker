@@ -34,7 +34,7 @@ const App = {
     },
 
 
-    toggleAction(id) {
+    async toggleAction(id) {
 
     const action = State.actions.find(
         a => a.id === id
@@ -42,53 +42,49 @@ const App = {
 
     if (!action) return;
 
-
     action.completed = !action.completed;
-
 
     const today = new Date()
         .toISOString()
         .split("T")[0];
 
+    if (action.completed) {
 
-    const existing = State.history.find(
-        h =>
-        h.date === today &&
-        h.actionId === id
-    );
-
-
-    if(action.completed){
-
-        if(!existing){
-
-            State.history.push({
-
-                date: today,
-
-                actionId:id,
-
-                completed:true
-
-            });
-
-        }
+        await supabaseClient
+    .from("history")
+    .upsert({
+        profile_id: State.profile.id,
+        identity_id: State.currentIdentityId,
+        action_id: id,
+        date: today,
+        completed: true
+    },{
+    onConflict: "identity_id,action_id,date"
+    });
 
     } else {
 
-        State.history =
-        State.history.filter(
-            h =>
-            !(h.date === today &&
-              h.actionId === id)
-        );
+        await supabaseClient
+    .from("history")
+    .delete()
+    .eq("profile_id", State.profile.id)
+    .eq("identity_id", State.currentIdentityId)
+    .eq("action_id", id)
+    .eq("date", today);
 
     }
 
+    await Database.loadHistory();
 
-       this.render();
+    this.render();
 
-     },
+    UI.showToast(
+    action.completed
+    ? "🔥 Action completed"
+    : "Action unchecked"
+    );
+
+    },
 
      openSheet(id = null) {
 
@@ -224,30 +220,44 @@ closeSheet() {
 
     async saveReflection() {
 
-        const reflection = {
-
-        profile_id: State.profile.id,
-
-        win: document.getElementById("winReflection").value,
-
-        challenge: document.getElementById("challengeReflection").value,
-
-        tomorrow: document.getElementById("tomorrowReflection").value
-
-    };
+    const today = new Date()
+    .toISOString()
+    .split("T")[0];
 
 
-    await supabaseClient
+const reflection = {
+
+    profile_id: State.profile.id,
+
+    identity_id: State.currentIdentityId,
+
+    reflection_date: today,
+
+    win: document.getElementById("winReflection").value,
+
+    challenge: document.getElementById("challengeReflection").value,
+
+    tomorrow: document.getElementById("tomorrowReflection").value
+
+};
+    const { data, error } = await supabaseClient
     .from("reflections")
-    .insert(reflection);
+    .upsert(reflection,{
+        onConflict: "identity_id,reflection_date"
+    })
+    .select()
+    .single();
+
+    if (error) {
+        console.error(error);
+        return;
+    }
 
     State.reflections.unshift(data);
 
-    UI.showToast(
-        "Reflection saved 🌱"
-    );
+    UI.showToast("Reflection saved 🌱");
 
-    },
+},
 
     async createIdentity() {
 
@@ -278,6 +288,8 @@ closeSheet() {
     State.profile.identity = data.name;
 
     await Database.loadActions();
+    await Database.loadHistory();
+    await Database.loadReflections();
 
     this.navigate("today");
 
@@ -295,7 +307,10 @@ closeSheet() {
 
     State.profile.identity = identity.name;
 
+    
     await Database.loadActions();
+    await Database.loadHistory();
+    await Database.loadReflections();
 
     this.navigate("today");
 
@@ -380,58 +395,99 @@ async deleteIdentity(identityId) {
 
     openDay(date){
 
-    const entries = State.history.filter(
-        h => h.date === date
+        const actions = State.history
+        .filter(h =>
+        h.date === date &&
+        h.identity_id === State.currentIdentityId
+        )
+        .map(h => {
+
+            const action = State.actions.find(
+                a => a.id === h.action_id
+            );
+
+            return action
+                ? `✓ ${action.title}`
+                : null;
+
+        })
+        .filter(Boolean);
+
+
+    const reflection = State.reflections.find(r =>
+    r.reflection_date === date &&
+    r.identity_id === State.currentIdentityId
     );
 
 
-    const habits = entries.map(entry => {
-
-        const action = State.actions.find(
-            a => a.id === entry.actionId
-        );
-
-        return action
-            ? action.title
-            : "";
-
-    });
-
-
     document.getElementById("dayModalTitle")
-    .innerHTML = date;
+        .innerHTML = date;
 
 
     document.getElementById("dayModalContent")
-    .innerHTML = habits.length
+        .innerHTML = `
+            ${
+            actions.length
+            ?
+            actions.map(a => `
+                <div class="modal-habit">
+                    ${a}
+                </div>
+            `).join("")
+            :
+            "<p>No completed actions</p>"
+            }
 
-    ? habits.map(h => `
+
+            ${
+            reflection
+            ?
+            `
+            <div class="modal-reflection">
+
+                <h3>Reflection</h3>
+
+                <p>
+                <strong>Win:</strong><br>
+                ${reflection.win || ""}
+                </p>
+
+                <p>
+                <strong>Challenge:</strong><br>
+                ${reflection.challenge || ""}
+                </p>
+
+                <p>
+                <strong>Tomorrow:</strong><br>
+                ${reflection.tomorrow || ""}
+                </p>
+
+            </div>
+            `
+            :
+            ""
+            }
+        `;
+
     
-        <div class="modal-habit">
-            ✓ ${h}
-        </div>
-
-    `).join("")
-
-    : `
-        <p>No habits completed</p>
-    `;
 
 
     document
     .getElementById("dayModal")
     .classList.remove("hidden");
+        },
 
-    },
 
-    closeDayModal(){
+        closeDayModal(){
 
     document
     .getElementById("dayModal")
     .classList.add("hidden");
+        }
 
-    }
-};
+    };
+
+
 
  window.App = App;
 

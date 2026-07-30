@@ -30,26 +30,47 @@ const Pages = {
                 Change Identity
             </button>
 
-            ${UI.progressRing(
-            State.actions.filter(a => a.completed).length,
+           ${UI.progressRing(
+            State.history.filter(
+            h => h.identity_id === State.currentIdentityId &&
+             h.date === new Date().toISOString().split("T")[0]
+            ).length,
             State.actions.length
             )}
 
             ${UI.sectionHeader(
             "Today's Votes",
-            `<span>${State.actions.filter(a => a.completed).length} / ${State.actions.length}</span>`
-)}
+            `<span>${
+            State.history.filter(
+            h => h.identity_id === State.currentIdentityId &&
+            h.date === new Date().toISOString().split("T")[0]
+            ).length
+            } / ${State.actions.length}</span>`
+            )}
 
             ${State.actions
-            .map(action =>
-            UI.actionRow(
-            action.title,
-            action.subtitle,
-            action.completed,
-            action.id
-        )
-    )
-    .join("")}
+.map(action => {
+
+    const today = new Date()
+        .toISOString()
+        .split("T")[0];
+
+            const completed = State.history.some(
+                h =>
+                h.action_id === action.id &&
+                h.identity_id === State.currentIdentityId &&
+                h.date === today
+            );
+
+            return UI.actionRow(
+                action.title,
+                action.subtitle,
+                completed,
+                action.id
+            );
+
+            })
+            .join("")}
 
             ${UI.button(
             "+ New Action",
@@ -353,8 +374,15 @@ onclick="App.createIdentity()">
 
         </div>
 
+        ${UI.stats()}
 
         ${UI.calendar()}
+        
+        ${UI.sectionHeader("History")}
+
+        ${UI.historyTimeline()}
+
+        ${UI.dayModal()}
 
 
     </div>

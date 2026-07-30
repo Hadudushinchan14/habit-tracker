@@ -56,7 +56,7 @@ const UI = {
 
         return `
 
-        <div class="action-card">
+        <div class="action-card ${completed ? "completed" : ""}">
 
             <div>
 
@@ -414,6 +414,330 @@ const UI = {
         </div>
 
     </div>
+
+    `;
+
+    },
+
+    historyTimeline() {
+
+    if (!State.history.length && !State.reflections.length) {
+
+        return `
+            <div class="empty-state">
+                No history yet.
+            </div>
+        `;
+
+    }
+
+
+    const identityHistory = State.history
+    .filter(h => h.identity_id === State.currentIdentityId);
+
+const dates = [
+    ...new Set([
+        ...identityHistory.map(h => h.date),
+        ...State.reflections.map(r =>
+            r.created_at.split("T")[0]
+        )
+        ])
+        ]
+        .sort((a,b) => b.localeCompare(a));
+
+
+    return dates.map(date => {
+
+            const actions = identityHistory
+            .filter(h => h.date === date)
+            .map(h => {
+
+                const action = State.actions.find(
+                    a => a.id === h.action_id
+                );
+
+                return action
+                    ? `<div>✓ ${action.title}</div>`
+                    : "";
+
+            })
+            .join("");
+
+
+            const reflection = State.reflections.find(r =>
+            r.reflection_date === date &&
+            r.identity_id === State.currentIdentityId
+        );
+
+        return `
+
+        <div class="history-card">
+
+            <div class="history-date">
+                ${date}
+            </div>
+
+
+            <div class="history-actions">
+
+                ${actions || "No completed actions"}
+
+            </div>
+
+
+            ${
+            reflection
+            ? `
+
+            <div class="history-reflection">
+
+                <h4>Reflection</h4>
+
+                <p>
+                <strong>Win:</strong>
+                ${reflection.win || ""}
+                </p>
+
+                <p>
+                <strong>Challenge:</strong>
+                ${reflection.challenge || ""}
+                </p>
+
+                <p>
+                <strong>Tomorrow:</strong>
+                ${reflection.tomorrow || ""}
+                </p>
+
+            </div>
+
+            `
+            : ""
+            }
+
+
+        </div>
+
+        `;
+
+
+    }).join("");
+
+    },
+
+        stats() {
+
+    const completedDates = [
+    ...new Set(
+        State.history
+        .filter(h => h.identity_id === State.currentIdentityId)
+        .map(h => h.date)
+    )
+]
+    .sort();
+
+
+    let currentStreak = 0;
+
+    let checkDate = new Date();
+
+const today = checkDate
+    .toISOString()
+    .split("T")[0];
+
+if(!completedDates.includes(today)){
+
+    checkDate.setDate(
+        checkDate.getDate() - 1
+    );
+
+    }
+
+
+    while(true){
+
+        const date = checkDate
+            .toISOString()
+            .split("T")[0];
+
+
+        if(completedDates.includes(date)){
+
+            currentStreak++;
+
+            checkDate.setDate(
+                checkDate.getDate() - 1
+            );
+
+        } else {
+
+            break;
+
+        }
+
+    }
+
+
+    let bestStreak = 0;
+    let tempStreak = 0;
+
+
+    completedDates.forEach((date, index) => {
+
+        if(index === 0){
+
+            tempStreak = 1;
+
+        } else {
+
+            const previous = new Date(
+                completedDates[index - 1]
+            );
+
+            const current = new Date(date);
+
+
+            const diff =
+                (current - previous)
+                /
+                (1000 * 60 * 60 * 24);
+
+
+            if(diff === 1){
+
+                tempStreak++;
+
+            } else {
+
+                tempStreak = 1;
+
+            }
+
+        }
+
+
+        if(tempStreak > bestStreak){
+
+            bestStreak = tempStreak;
+
+        }
+
+    });
+
+
+    const uniqueHistory = [
+    ...new Map(
+        State.history
+        .filter(h => h.identity_id === State.currentIdentityId)
+        .map(h => [
+            `${h.date}-${h.action_id}`,
+            h
+        ])
+    ).values()
+    ];
+
+
+const totalPossible =
+    State.actions.length *
+    completedDates.length;
+
+
+const completion =
+    totalPossible === 0
+    ? 0
+    : Math.min(
+        100,
+        Math.round(
+            (uniqueHistory.length / totalPossible) * 100
+        )
+    );
+
+
+    return `
+
+    <div class="stats-grid">
+
+
+        <div class="stat-card">
+
+            <h3>
+            🔥 Current Streak
+            </h3>
+
+            <strong>
+            ${currentStreak}
+            </strong>
+
+            <p>
+            Days consistent
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>
+            🏆 Best Streak
+            </h3>
+
+            <strong>
+            ${bestStreak}
+            </strong>
+
+            <p>
+            Personal record
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>
+            ✅ Completion
+            </h3>
+
+            <strong>
+            ${completion}%
+            </strong>
+
+            <p>
+            Habit consistency
+            </p>
+
+        </div>
+
+
+    </div>
+
+    `;
+
+    },
+
+        dayModal() {
+
+return `
+
+<div id="dayModal" class="modal hidden">
+
+    <div class="modal-card">
+
+        <button 
+        class="modal-close"
+        onclick="App.closeDayModal()">
+            ✕
+        </button>
+
+
+        <h2 id="dayModalTitle"></h2>
+
+
+        <div id="dayModalContent"></div>
+
+
+    </div>
+
+</div>
 
     `;
 
