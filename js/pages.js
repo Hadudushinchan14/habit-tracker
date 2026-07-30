@@ -392,6 +392,110 @@ onclick="App.createIdentity()">
 
     `;
 
+
+        },
+
+
+    learn(){
+
+    return `
+
+    <div class="container">
+
+        <div class="hero">
+
+            <p class="greeting">
+                Atomic Habits Library 📚
+            </p>
+
+            <h1 class="headline">
+                Build better systems.
+            </h1>
+
+            <p class="daily-quote">
+                Small changes create remarkable results.
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>
+                Chapter 1
+            </h3>
+
+            <strong>
+                Identity
+            </strong>
+
+            <p>
+                Every action is a vote for the person
+                you want to become.
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3>
+                The 4 Laws
+            </h3>
+
+            <p>
+                1. Make it obvious<br>
+                2. Make it attractive<br>
+                3. Make it easy<br>
+                4. Make it satisfying
+            </p>
+
+        </div>
+
+
+        
+
+<div class="journal-card">
+
+<textarea
+id="habitNote"
+placeholder="Write something you want to remember..."
+></textarea>
+
+
+<button
+class="primary-button"
+onclick="App.saveNote()"
+>
+Save Note
+</button>
+
+
+</div>
+
+
+<div>
+
+${
+(State.notes || [])
+.map(note => `
+
+<div class="journal-card">
+
+<p>${note}</p>
+
+</div>
+
+`).join("")
+}
+
+</div>
+
+
+    ${UI.bottomNav("learn")}
+
+    `;
+
     },
 
 

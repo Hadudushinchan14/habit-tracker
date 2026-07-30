@@ -393,6 +393,32 @@ async deleteIdentity(identityId) {
 
     },
 
+    saveNote(){
+
+const input =
+document.getElementById("habitNote");
+
+
+const note =
+input.value.trim();
+
+
+if(!note) return;
+
+
+State.notes.unshift(note);
+
+
+input.value = "";
+
+
+this.render();
+
+
+UI.showToast("Note saved 🌱");
+
+    },
+
     openDay(date){
 
         const actions = State.history
@@ -486,6 +512,8 @@ async deleteIdentity(identityId) {
         }
 
     };
+
+
 
 
 

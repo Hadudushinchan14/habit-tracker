@@ -15,6 +15,8 @@ const State = {
 
     reflections: [],
 
+    notes: [],
+
      editingActionId: null
 
 };

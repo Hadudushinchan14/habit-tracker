@@ -99,6 +99,12 @@ const UI = {
         },
 
         {
+            id: "learn",
+            icon: "📚",
+            label: "Learn"
+        },
+
+        {
             id:"journal",
             icon:"📖",
             label:"Diary"
@@ -348,6 +354,108 @@ const UI = {
     `;
 
     },
+
+    learn(){
+
+return `
+
+<div class="container">
+
+    <div class="hero">
+
+        <p class="greeting">
+            Learn 🌱
+        </p>
+
+        <h1 class="headline">
+            Atomic Habits
+        </h1>
+
+        <p class="daily-quote">
+            Small changes. Remarkable results.
+        </p>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <h3>
+            The Core Idea
+        </h3>
+
+        <p>
+            You don't rise to the level of your goals.
+            You fall to the level of your systems.
+        </p>
+
+    </div>
+
+
+    ${UI.sectionHeader("Four Laws of Behavior Change")}
+
+
+    <div class="journal-card">
+
+        <h3>
+            1. Make it Obvious 👀
+        </h3>
+
+        <p>
+            Design your environment so good habits
+            are easier to start.
+        </p>
+
+    </div>
+
+
+    <div class="journal-card">
+
+        <h3>
+            2. Make it Attractive ✨
+        </h3>
+
+        <p>
+            Pair habits with things you enjoy.
+        </p>
+
+    </div>
+
+
+    <div class="journal-card">
+
+        <h3>
+            3. Make it Easy ⚡
+        </h3>
+
+        <p>
+            Reduce friction. Start small.
+        </p>
+
+    </div>
+
+
+    <div class="journal-card">
+
+        <h3>
+            4. Make it Satisfying ✅
+        </h3>
+
+        <p>
+            Reward yourself and track progress.
+        </p>
+
+    </div>
+
+
+</div>
+
+
+${UI.bottomNav("learn")}
+
+`;
+
+},
 
     calendar(){
 
