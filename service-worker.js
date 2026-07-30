@@ -1,4 +1,4 @@
-const CACHE_NAME = "identity-os-v2.0";
+const CACHE_NAME = "identity-os-v2.1";
 
 
 const FILES = [
