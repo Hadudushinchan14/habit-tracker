@@ -21,6 +21,10 @@ const Database = {
     await this.loadActions();
     await this.loadHistory();
     await this.loadReflections();
+    await this.loadLessonProgress();
+
+    State.completedLessons =
+    State.lessonProgress.map(p => p.lesson_id);
 
     },
     
@@ -57,6 +61,40 @@ const Database = {
             .eq("identity_id", State.currentIdentityId);
 
         State.history = data || [];
+
+    },
+
+    async loadLessonProgress(){
+
+const { data, error } = await supabaseClient
+.from("lesson_progress")
+.select("*")
+.eq("profile_id", State.profile.id);
+
+
+if(error){
+console.error(error);
+return;
+}
+
+    console.log("LESSON PROGRESS:", data);
+
+State.lessonProgress = data || [];
+
+},
+
+    getCounterValue(actionId) {
+
+    const today = new Date()
+        .toISOString()
+        .split("T")[0];
+
+    const record = State.history.find(h =>
+        h.action_id === actionId &&
+        h.date === today
+    );
+
+    return record?.value ?? 0;
 
     },
 

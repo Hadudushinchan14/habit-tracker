@@ -33,6 +33,153 @@ const App = {
 
     },
 
+    async completeLesson(id){
+
+    const lesson = Lessons.find(
+        l => l.id === id
+    );
+
+    const alreadyCreated =
+    State.actions.some(
+        a => a.lesson_id === id
+    );
+
+if (alreadyCreated) {
+
+    UI.showToast("Habit already created 🌱");
+
+    this.navigate("today");
+
+    return;
+
+}
+
+  
+    if (!lesson) return;
+
+    lesson.completed = true;
+
+    this.render();
+
+    },
+
+    async createHabitFromLesson(id){
+
+        
+const lesson = Lessons.find(
+    l => l.id === id
+);
+
+
+const responseInput =
+document.getElementById("lessonResponse");
+
+const response =
+responseInput
+? responseInput.value.trim()
+: "";
+
+const title =
+response || lesson.title;
+
+
+const subtitleInput =
+document.getElementById("lessonSubtitle");
+
+const subtitle =
+subtitleInput
+? subtitleInput.value.trim()
+: "";
+
+
+if(!title){
+
+UI.showToast("Create your habit first");
+
+return;
+
+}
+
+
+const { data, error } = await supabaseClient
+.from("actions")
+.insert({
+
+profile_id: State.profile.id,
+
+identity_id: State.currentIdentityId,
+
+title:title,
+
+subtitle:subtitle || lesson.title,
+
+description: lesson.principle,
+
+is_counter:false,
+
+completed:false,
+
+lesson_id: lesson.id,
+
+lesson_title: lesson.title
+
+})
+.select()
+.single();
+
+
+
+if(error){
+
+console.error(error);
+
+UI.showToast("Failed creating habit");
+
+return;
+
+}
+
+
+const { data: progressData, error: progressError } = await supabaseClient
+.from("lesson_progress")
+.upsert({
+    profile_id: State.profile.id,
+    lesson_id: lesson.id,
+    response: response
+},{
+    onConflict: "profile_id,lesson_id"
+})
+
+.select()
+.single();
+
+console.log("PROGRESS SAVED:", progressData);
+console.log("PROGRESS ERROR:", progressError);
+
+if (progressError) {
+    console.error(progressError);
+}
+
+await Database.loadLessonProgress();
+
+await Database.loadActions();
+
+UI.showToast("Habit created 🌱");
+
+this.navigate("today");
+
+},
+
+
+
+    openLesson(id){
+
+    const page = UI.lessonDetail(id);
+
+    document.getElementById("app").innerHTML = page;
+
+    },
+
 
     async toggleAction(id) {
 
@@ -86,6 +233,61 @@ const App = {
 
     },
 
+    async saveCounter(actionId, value) {
+
+    const today = new Date()
+        .toISOString()
+        .split("T")[0];
+
+    await supabaseClient
+        .from("history")
+        .upsert({
+            profile_id: State.profile.id,
+            identity_id: State.currentIdentityId,
+            action_id: actionId,
+            date: today,
+            completed: value > 0,
+            value: value
+        }, {
+            onConflict: "identity_id,action_id,date"
+        });
+
+    },
+
+    changeCounter(id, amount) {
+
+    const input = document.getElementById(`counter-${id}`);
+
+    if (!input) return;
+
+    let value = Number(input.value) || 0;
+
+    value += amount;
+
+    if (value < 0) value = 0;
+
+    input.value = value;
+
+    },
+
+    async saveCounterFromInput(id) {
+
+    const input = document.getElementById(`counter-${id}`);
+
+    if (!input) return;
+
+    const value = Math.max(0, Number(input.value) || 0);
+
+    await this.saveCounter(id, value);
+
+    await Database.loadHistory();
+
+    this.render();
+
+    UI.showToast("Counter saved 💪");
+
+    },
+
      openSheet(id = null) {
 
     State.editingActionId = id;
@@ -100,7 +302,13 @@ const App = {
             action.title;
 
         document.getElementById("actionSubtitle").value =
-            action.subtitle || "";
+    action.lesson_id ? "" : (action.subtitle || "");
+        
+        document.getElementById("actionDescription").value =
+            action.description || "";
+
+        document.getElementById("actionIsCounter").checked =
+            action.is_counter || false;
 
         document.getElementById("deleteAction").style.display =
             "block";
@@ -110,6 +318,10 @@ const App = {
         document.getElementById("actionTitle").value = "";
 
         document.getElementById("actionSubtitle").value = "";
+
+        document.getElementById("actionDescription").value = "";
+
+        document.getElementById("actionIsCounter").checked = false;
 
         document.getElementById("deleteAction").style.display =
             "none";
@@ -148,6 +360,15 @@ closeSheet() {
         .value
         .trim();
 
+    const description = document
+        .getElementById("actionDescription")
+        .value
+        .trim();
+
+    const isCounter = document
+        .getElementById("actionIsCounter")
+        .checked;
+
     if (!title) return;
 
     if (State.editingActionId) {
@@ -156,8 +377,10 @@ closeSheet() {
         .from("actions")
         .update({
             title,
-            subtitle
-        })
+            subtitle,
+            description,
+            is_counter: isCounter
+})
         .eq("id", State.editingActionId);
 
     if (error) {
@@ -173,6 +396,8 @@ closeSheet() {
          profile_id: State.profile.id,
          title: title,
          subtitle: subtitle,
+         description: description,
+         is_counter: isCounter,
          completed: false,
          identity_id: State.currentIdentityId
 });
@@ -290,6 +515,7 @@ const reflection = {
     await Database.loadActions();
     await Database.loadHistory();
     await Database.loadReflections();
+    await Database.loadLessonProgress();
 
     this.navigate("today");
 
@@ -433,7 +659,9 @@ UI.showToast("Note saved 🌱");
             );
 
             return action
-                ? `✓ ${action.title}`
+                    ? action.is_counter
+                    ? `🔢 ${action.title}: ${h.value ?? 0}`
+                    : `✓ ${action.title}`
                 : null;
 
         })

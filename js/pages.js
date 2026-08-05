@@ -61,13 +61,10 @@ const Pages = {
                 h.identity_id === State.currentIdentityId &&
                 h.date === today
             );
+            
+            action.completed = completed;
 
-            return UI.actionRow(
-                action.title,
-                action.subtitle,
-                completed,
-                action.id
-            );
+            return UI.actionRow(action);
 
             })
             .join("")}
@@ -210,6 +207,22 @@ const Pages = {
             </p>
 
         </div>
+
+        <div class="stat-card">
+
+    <h3>
+        Lessons Completed 📚
+    </h3>
+
+    <strong>
+        ${(State.lessonProgress || []).length}/${Lessons.length}
+    </strong>
+
+    <p>
+        Knowledge turned into action.
+    </p>
+
+</div>
 
 
     </div>
@@ -396,107 +409,177 @@ onclick="App.createIdentity()">
         },
 
 
-    learn(){
+   learn(){
 
-    return `
-
-    <div class="container">
-
-        <div class="hero">
-
-            <p class="greeting">
-                Atomic Habits Library 📚
-            </p>
-
-            <h1 class="headline">
-                Build better systems.
-            </h1>
-
-            <p class="daily-quote">
-                Small changes create remarkable results.
-            </p>
-
-        </div>
+const completed =
+    (State.lessonProgress || [])
+    .map(p => p.lesson_id);
 
 
-        <div class="stat-card">
-
-            <h3>
-                Chapter 1
-            </h3>
-
-            <strong>
-                Identity
-            </strong>
-
-            <p>
-                Every action is a vote for the person
-                you want to become.
-            </p>
-
-        </div>
+const total =
+    Lessons.length;
 
 
-        <div class="stat-card">
-
-            <h3>
-                The 4 Laws
-            </h3>
-
-            <p>
-                1. Make it obvious<br>
-                2. Make it attractive<br>
-                3. Make it easy<br>
-                4. Make it satisfying
-            </p>
-
-        </div>
+const progress =
+    total === 0
+    ? 0
+    : Math.round(
+        (completed.length / total) * 100
+    );
 
 
-        
+const nextLesson =
+    Lessons.find(
+        l => !completed.includes(l.id)
+    );
 
-<div class="journal-card">
 
-<textarea
-id="habitNote"
-placeholder="Write something you want to remember..."
-></textarea>
+const modules = [
+    ...new Set(
+        Lessons.map(l => l.module)
+    )
+];
 
+return `
+
+<div class="container">
+
+<div class="hero">
+
+<p class="greeting">
+Atomic Habits Training 📚
+</p>
+
+<h1 class="headline">
+Build better systems.
+</h1>
+
+<p class="daily-quote">
+Small changes create remarkable results.
+</p>
+
+   
+</div>
+
+<div class="stat-card">
+
+<h3>
+📚 Learning Progress
+</h3>
+
+<strong>
+${completed.length}/${total}
+</strong>
+
+<p>
+${progress}% completed
+</p>
+
+</div>
+
+${nextLesson ? `
+
+<div class="stat-card">
+
+<h3>
+Continue Learning 🌱
+</h3>
+
+<p>
+Next: ${nextLesson.title}
+</p>
 
 <button
 class="primary-button"
-onclick="App.saveNote()"
+onclick="App.openLesson(${nextLesson.id})"
 >
-Save Note
+Continue Lesson
+</button>
+
+</div>
+
+` : `
+
+<div class="stat-card">
+
+<h3>
+🎉 Course Complete
+</h3>
+
+<p>
+You completed all 20 lessons.
+</p>
+
+</div>
+
+`}
+
+
+${modules.map(module => `
+
+<div class="stat-card">
+
+<h3>
+${module}
+</h3>
+
+
+${Lessons
+.filter(l => l.module === module)
+.map(lesson => `
+
+<div class="journal-card">
+
+
+<h3>
+${lesson.id}. ${lesson.title}
+</h3>
+
+
+<p>
+${lesson.principle}
+</p>
+
+
+<p>
+<strong>
+Challenge:
+</strong>
+
+${lesson.action}
+
+</p>
+
+
+<button
+class="${completed.includes(lesson.id)
+? "secondary-button"
+: "primary-button"}"
+onclick="App.openLesson(${lesson.id})"
+>
+${completed.includes(lesson.id)
+? "✓ Review Lesson"
+: "Start Lesson"}
 </button>
 
 
 </div>
 
 
-<div>
+`).join("")}
 
-${
-(State.notes || [])
-.map(note => `
-
-<div class="journal-card">
-
-<p>${note}</p>
-
-</div>
-
-`).join("")
-}
 
 </div>
 
 
-    ${UI.bottomNav("learn")}
+`).join("")}
 
-    `;
 
-    },
+${UI.bottomNav("learn")}
+
+`;
+
+},
 
 
 

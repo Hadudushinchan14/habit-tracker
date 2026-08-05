@@ -17,6 +17,10 @@ const State = {
 
     notes: [],
 
+    completedLessons: [],
+
+    lessonProgress: [],
+
      editingActionId: null
 
 };

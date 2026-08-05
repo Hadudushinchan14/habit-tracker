@@ -52,9 +52,19 @@ const UI = {
 
     },
 
-    actionRow(title, subtitle, completed = false, id) {
+    actionRow(action){
 
-        return `
+    const {
+        id,
+        title,
+        subtitle,
+        completed,
+        is_counter
+    } = action;
+
+    const counterValue = Database.getCounterValue(id);
+
+    return `
 
         <div class="action-card ${completed ? "completed" : ""}">
 
@@ -62,7 +72,21 @@ const UI = {
 
                 <h3>${title}</h3>
 
-                <p>${subtitle}</p>
+                <p>
+                    ${action.description || subtitle || ""}
+                </p>
+
+${
+action.lesson_title
+?
+`
+<small class="habit-source">
+Created from: ${action.lesson_title}
+</small>
+`
+:
+""
+}
 
             </div>
 
@@ -73,14 +97,32 @@ const UI = {
             ✏️
             </button>
 
-           <button
+           ${is_counter ? `
+            <div class="counter-box">
+
+            <button onclick="App.changeCounter(${id}, -1)">-</button>
+
+            <input
+                id="counter-${id}"
+                type="number"
+                value="${counterValue}"
+    >
+
+            <button onclick="App.changeCounter(${id}, 1)">+</button>
+
+            <button onclick="App.saveCounterFromInput(${id})">
+                Save
+            </button>
+
+        </div>
+        ` : `
+        <button
             class="vote-button ${completed ? "completed" : ""}"
             onclick="App.toggleAction(${id})"
-            >
-
+        >
             ${completed ? "✓" : "○"}
-
-            </button>
+        </button>
+        `},
 
         </div>
 
@@ -261,6 +303,19 @@ const UI = {
             placeholder="Why does this matter?"
         >
 
+        <textarea
+            id="actionDescription"
+            placeholder="Description"
+        ></textarea>
+
+        <label class="counter-toggle">
+            <input
+                id="actionIsCounter"
+                type="checkbox"
+            >
+            Counter
+        </label>
+
         <div class="sheet-actions">
 
             <button
@@ -357,95 +412,133 @@ const UI = {
 
     learn(){
 
+const completed =
+    (State.lessonProgress || [])
+    .map(p => p.lesson_id);
+
+const total =
+    Lessons.length;
+
+const progress =
+    total === 0
+    ? 0
+    : Math.round(
+        (completed.length / total) * 100
+    );
+
+
+const modules = [
+    ...new Set(
+        Lessons.map(l => l.module)
+    )
+];
+
+
 return `
 
 <div class="container">
 
-    <div class="hero">
+<div class="hero">
 
-        <p class="greeting">
-            Learn 🌱
-        </p>
+<p class="greeting">
+Learn 🌱
+</p>
 
-        <h1 class="headline">
-            Atomic Habits
-        </h1>
+<h1 class="headline">
+Atomic Habits Training
+</h1>
 
-        <p class="daily-quote">
-            Small changes. Remarkable results.
-        </p>
+<p class="daily-quote">
+Build your identity one action at a time.
+</p>
 
-    </div>
-
-
-    <div class="stat-card">
-
-        <h3>
-            The Core Idea
-        </h3>
-
-        <p>
-            You don't rise to the level of your goals.
-            You fall to the level of your systems.
-        </p>
-
-    </div>
+</div>
 
 
-    ${UI.sectionHeader("Four Laws of Behavior Change")}
+<div class="stat-card">
+
+<h3>
+📚 Learning Progress
+</h3>
+
+<strong>
+${completed.length}/${total}
+</strong>
+
+<p>
+${progress}% completed
+</p>
+
+</div>
 
 
-    <div class="journal-card">
 
-        <h3>
-            1. Make it Obvious 👀
-        </h3>
+${modules.map(module=>`
 
-        <p>
-            Design your environment so good habits
-            are easier to start.
-        </p>
+<div class="learn-module">
 
-    </div>
+<h2>
+${module}
+</h2>
 
 
-    <div class="journal-card">
+${Lessons
+.filter(l => l.module === module)
+.map(lesson=>`
 
-        <h3>
-            2. Make it Attractive ✨
-        </h3>
-
-        <p>
-            Pair habits with things you enjoy.
-        </p>
-
-    </div>
+<div class="journal-card 
+${completed.includes(lesson.id) ? "completed" : ""}"
+>
 
 
-    <div class="journal-card">
-
-        <h3>
-            3. Make it Easy ⚡
-        </h3>
-
-        <p>
-            Reduce friction. Start small.
-        </p>
-
-    </div>
+<h3>
+${lesson.id}. ${lesson.title}
+</h3>
 
 
-    <div class="journal-card">
+<p>
+${lesson.principle}
+</p>
 
-        <h3>
-            4. Make it Satisfying ✅
-        </h3>
 
-        <p>
-            Reward yourself and track progress.
-        </p>
+<div class="lesson-action">
 
-    </div>
+<strong>
+Challenge:
+</strong>
+
+${lesson.action}
+
+</div>
+
+
+<button
+class="${completed.includes(lesson.id)
+? "secondary-button"
+: "primary-button"}"
+
+onclick="App.openLesson(${lesson.id})"
+
+>
+
+${completed.includes(lesson.id)
+? "✓ Completed"
+: "Complete Lesson"}
+
+</button>
+
+
+</div>
+
+
+`).join("")}
+
+
+</div>
+
+
+`).join("")}
+
 
 
 </div>
@@ -455,7 +548,7 @@ ${UI.bottomNav("learn")}
 
 `;
 
-},
+    },
 
     calendar(){
 
@@ -476,21 +569,30 @@ ${UI.bottomNav("learn")}
     for(let i = 1; i <= days; i++){
 
         const date =
-            `${year}-${String(month+1).padStart(2,"0")}-${String(i).padStart(2,"0")}`;
+        `${year}-${String(month + 1).padStart(2, "0")}-${String(i).padStart(2, "0")}`;
 
+        const total = State.history
+    .filter(h =>
+        h.date === date &&
+        h.identity_id === State.currentIdentityId
+    )
+    .reduce((sum, h) => sum + (h.value || 0), 0);
 
-        html += `
+html += `
+<div
+    class="calendar-day ${Calendar.isCompleted(date) ? "done" : ""}"
+    onclick="App.openDay('${date}')"
+>
 
-            <div 
-            class="calendar-day ${Calendar.isCompleted(date) ? "done" : ""}"
-            onclick="App.openDay('${date}')"
-            >
+    <div>${i}</div>
 
-            ${i}
+    ${total > 0
+        ? `<small>${total}</small>`
+        : ""
+    }
 
-            </div>
-
-            `;
+</div>
+`;
 
     }
 
@@ -557,19 +659,43 @@ const dates = [
     return dates.map(date => {
 
             const actions = identityHistory
-            .filter(h => h.date === date)
-            .map(h => {
+    .filter(h => h.date === date)
+    .map(h => {
 
-                const action = State.actions.find(
-                    a => a.id === h.action_id
-                );
+        const action = State.actions.find(
+            a => a.id === h.action_id
+        );
 
-                return action
-                    ? `<div>✓ ${action.title}</div>`
-                    : "";
+        if(!action) return "";
 
-            })
-            .join("");
+        return action.is_counter
+
+?
+`
+<div>
+➕ ${action.title}: ${h.value}
+</div>
+`
+
+:
+
+`
+<div>
+✓ ${action.title}
+
+${
+action.lesson_title
+?
+`<small>Built from: ${action.lesson_title}</small>`
+:
+""
+}
+
+</div>
+`;
+
+        })
+        .join("");
 
 
             const reflection = State.reflections.find(r =>
@@ -934,8 +1060,199 @@ async signup() {
         UI.showToast("Account created. Check your email.");
     }
 
+},
+
+    lessonDetail(id){
+
+const lesson = Lessons.find(
+    l => l.id === id
+);
+
+const progress =
+    (State.lessonProgress || [])
+    .find(
+        p => p.lesson_id === id
+    );
+
+const savedResponse =
+    progress?.response || "";
+
+if(!lesson) return "";
+
+
+let exercise = "";
+
+
+if(lesson.type === "identity"){
+
+exercise = `
+
+<input
+id="lessonResponse"
+class="lesson-input"
+value="${savedResponse}"
+placeholder="I am becoming someone who..."
+>
+
+`;
+
 }
 
+
+if(lesson.type === "reflection"){
+
+exercise = `
+
+<textarea
+id="lessonResponse"
+class="lesson-input"
+placeholder="Write your reflection..."
+></textarea>
+
+`;
+
+}
+
+
+if(lesson.type === "habit"){
+
+exercise = `
+
+<input
+id="lessonResponse"
+class="lesson-input"
+placeholder="My new habit..."
+>
+
+
+<input
+id="lessonSubtitle"
+class="lesson-input"
+placeholder="Why does this matter?"
+>
+
+`;
+
+}
+
+
+if(lesson.type === "challenge"){
+
+exercise = `
+
+<label class="challenge-box">
+
+<input
+type="checkbox"
+id="lessonChallenge"
+>
+
+I completed this challenge
+
+</label>
+
+`;
+
+}
+
+
+
+return `
+
+<div class="container">
+
+
+<div class="hero">
+
+<p class="greeting">
+${lesson.module}
+</p>
+
+
+<h1 class="headline">
+${lesson.title}
+</h1>
+
+
+<p class="daily-quote">
+Lesson ${lesson.id} of ${Lessons.length}
+</p>
+
+</div>
+
+
+
+<div class="stat-card">
+
+<h3>
+💡 Principle
+</h3>
+
+<p>
+${lesson.principle}
+</p>
+
+</div>
+
+
+
+<div class="journal-card">
+
+<h3>
+🎯 Challenge
+</h3>
+
+<p>
+${lesson.action}
+</p>
+
+
+${exercise}
+
+
+</div>
+
+
+${
+lesson.type === "habit"
+
+?
+
+`
+<button
+
+class="primary-button"
+
+onclick="App.createHabitFromLesson(${lesson.id})"
+
+>
+Create Habit
+</button>
+`
+
+:
+
+`
+<button
+class="primary-button"
+onclick="App.createHabitFromLesson(${lesson.id})"
+>
+Create Habit From Lesson
+</button>
+`
+
+}
+
+
+
+</div>
+
+
+${UI.bottomNav("learn")}
+
+`;
+
+}
 
 
 };

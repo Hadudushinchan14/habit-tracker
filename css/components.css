@@ -789,6 +789,14 @@ textarea {
   transform: scale(1.05);
 }
 
+.calendar-day small{
+    display:block;
+    margin-top:4px;
+    font-size:11px;
+    font-weight:700;
+    color:#2563EB;
+}
+
 .weekday {
   text-align: center;
   font-size: 0.8rem;
@@ -1435,3 +1443,300 @@ textarea:focus-visible,
   background: var(--primary-light);
   color: var(--primary);
 }
+
+.counter-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(37,99,235,0.15);
+    border-radius: 16px;
+    justify-content: center;
+     width: 100%;
+}
+
+
+.counter-box button {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: none;
+    background: #DBEAFE;
+    color: #2563EB;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+
+.counter-box button:hover {
+    transform: scale(1.05);
+}
+
+
+.counter-box input {
+    width: 60px;
+    height: 38px;
+    text-align: center;
+    border-radius: 12px;
+    border: 1px solid #CBD5E1;
+    background: white;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+
+.counter-box input::-webkit-inner-spin-button,
+.counter-box input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+     appearance: none;
+    margin: 0;
+}
+
+
+.counter-box input[type="number"] {
+    -moz-appearance: textfield;
+     appearance: textfield;
+}
+
+
+.counter-box button:last-child {
+    width: auto;
+    padding: 0 16px;
+    background: #2563EB;
+    color: white;
+    font-size: 14px;
+}
+
+.action-card:has(.counter-box) {
+    display: flex;
+    flex-direction: column;
+}
+
+.action-card:has(.counter-box) .counter-box {
+    margin-top: auto;
+    justify-content: center;
+    width: 100%;
+}
+
+/* =========================
+   LESSON HABIT CONNECTION
+========================= */
+
+.habit-source {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--mmc-muted);
+}
+
+
+/* =========================
+   LEARNING PAGE
+========================= */
+
+.learn-module {
+    margin-bottom: 24px;
+}
+
+.learn-module h2 {
+    margin-bottom: 12px;
+    font-size: 20px;
+    color: var(--mmc-heading);
+}
+
+
+.lesson-action {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 14px;
+    background: var(--mmc-primary-soft);
+    color: var(--mmc-body);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+
+.lesson-input {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(37,99,235,.15);
+    background: white;
+    font-size: 15px;
+    outline: none;
+}
+
+
+.lesson-input:focus {
+    border-color: #2563EB;
+}
+
+
+/* =========================
+   COMPLETED LESSON
+========================= */
+
+.journal-card.completed {
+    opacity: .75;
+}
+
+
+.journal-card.completed .primary-button {
+    background: transparent;
+}
+
+
+/* =========================
+   HABIT CARDS
+========================= */
+
+.action-card {
+    position: relative;
+}
+
+
+.action-card h3 {
+    margin-bottom: 6px;
+}
+
+
+.action-card p {
+    margin: 0;
+    color: var(--mmc-body);
+}
+
+
+.vote-button {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: #2563EB;
+    color: white;
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.vote-button.completed {
+    background: #2563EB;
+    color: white;
+}
+
+
+/* =========================
+   MOBILE POLISH
+========================= */
+
+@media(max-width:600px){
+
+    .hero h1,
+    .headline {
+        font-size: 28px;
+    }
+
+
+    .stat-card,
+    .journal-card,
+    .action-card {
+        border-radius: 20px;
+    }
+
+
+    .bottom-nav {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+}
+
+ /* =========================
+    EDIT HABIT MODAL
+ ========================= */
+
+.bottom-sheet {
+    background: white;
+    border-radius: 28px 28px 0 0;
+    padding: 24px;
+    box-shadow: 0 -10px 40px rgba(15,23,42,.15);
+}
+
+
+.bottom-sheet h2 {
+    margin-bottom: 20px;
+    color: var(--mmc-heading);
+}
+
+
+.bottom-sheet input,
+.bottom-sheet textarea {
+    width: 100%;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    border-radius: 16px;
+    border: 1px solid #DBEAFE;
+    background: #F8FAFC;
+    font-size: 15px;
+    color: var(--mmc-heading);
+}
+
+
+.bottom-sheet textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+
+.bottom-sheet input:focus,
+.bottom-sheet textarea:focus {
+    outline: none;
+    border-color: #2563EB;
+    background: white;
+}
+
+
+/* Counter toggle */
+
+.counter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 16px;
+    background: #DBEAFE;
+    margin-bottom: 20px;
+    color: #1E3A8A;
+    font-weight: 600;
+}
+
+
+.counter-toggle input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+}
+
+
+/* Buttons */
+
+.sheet-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+
+.sheet-actions button {
+    flex: 1;
+    min-height: 46px;
+    border-radius: 16px;
+}
+
