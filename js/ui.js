@@ -1011,7 +1011,13 @@ return `
 
 <div class="login-page">
 
-    <h1>Identity OS</h1>
+    <img 
+    class="login-logo"
+    src="assets/icons/icon-192.png"
+    alt="Logo"
+>
+
+<h1>Identity OS</h1>
 
     <p class="login-subtitle">
         Build your identity one day at a time.
@@ -1048,7 +1054,7 @@ return `
         class="google-btn"
         onclick="loginWithGoogle()"
     >
-        Continue with Google
+        Continue with <span class="google-brand">Google</span>
     </button>
 
     ${this.signupSheet()}

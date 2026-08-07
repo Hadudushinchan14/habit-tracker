@@ -1263,11 +1263,12 @@ z-index: 100;
   margin: 0 auto;
 }
 
-.login-page::before {
-  content: "🌱";
-  font-size: 4.5rem;
-  text-align: center;
-  margin-bottom: 32px;
+.login-logo {
+    width: 250px;
+    height:250px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 32px;
 }
 
 .login-page h1 {
@@ -1332,13 +1333,28 @@ z-index: 100;
 }
 
 .google-btn {
-  margin-top: 32px !important;
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border) !important;
-  color: var(--text);
-  box-shadow: none;
+margin-top: 32px !important;
+background: rgba(255,255,255,0.9);
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
+border: 1px solid var(--border) !important;
+color: var(--text);
+font-weight: 700;
+box-shadow: none;
+}
+
+.google-brand {
+background: linear-gradient(
+90deg,
+#4285F4 0%,
+#34A853 35%,
+#FBBC05 65%,
+#EA4335 100%
+);
+-webkit-background-clip: text;
+background-clip: text;
+color: transparent;
+font-weight: 700;
 }
 
 .google-btn:hover {
