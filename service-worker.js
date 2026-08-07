@@ -1,4 +1,4 @@
-const CACHE_NAME = "identity-os-v2.2";
+const CACHE_NAME = "identity-os-v2.3";
 
 
 const FILES = [
@@ -43,15 +43,37 @@ event => {
 
 });
 
-    self.addEventListener(
+    self.addEventListener("message", event => {
+
+    if (event.data === "SKIP_WAITING") {
+        self.skipWaiting();
+    }
+
+});
+
+self.addEventListener(
 "activate",
 event => {
 
-    event.waitUntil(
-        self.clients.claim()
-    );
+event.waitUntil(
 
-});
+    caches.keys().then(keys =>
+        Promise.all(
+
+            keys.map(key => {
+
+                if (key !== CACHE_NAME) {
+                    return caches.delete(key);
+                }
+
+            })
+
+        )
+    ).then(() => self.clients.claim())
+
+);
+
+    });
 
 
 self.addEventListener("fetch", event => {

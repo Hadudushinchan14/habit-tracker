@@ -69,7 +69,7 @@ const Database = {
 const { data, error } = await supabaseClient
 .from("lesson_progress")
 .select("*")
-.eq("profile_id", State.profile.id);
+.eq("identity_id", State.currentIdentityId);
 
 
 if(error){

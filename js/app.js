@@ -144,10 +144,11 @@ const { data: progressData, error: progressError } = await supabaseClient
 .from("lesson_progress")
 .upsert({
     profile_id: State.profile.id,
+    identity_id: State.currentIdentityId,
     lesson_id: lesson.id,
     response: response
 },{
-    onConflict: "profile_id,lesson_id"
+    onConflict: "identity_id,lesson_id"
 })
 
 .select()
@@ -537,6 +538,7 @@ const reflection = {
     await Database.loadActions();
     await Database.loadHistory();
     await Database.loadReflections();
+    await Database.loadLessonProgress();
 
     this.navigate("today");
 
@@ -740,6 +742,15 @@ UI.showToast("Note saved 🌱");
         }
 
     };
+
+    navigator.serviceWorker.addEventListener(
+    "controllerchange",
+    () => {
+
+        window.location.reload();
+
+    }
+    );
 
 
 

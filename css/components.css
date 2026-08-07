@@ -1740,3 +1740,74 @@ textarea:focus-visible,
     border-radius: 16px;
 }
 
+/* ==========================
+   Locked Lesson Button
+========================== */
+
+.disabled-button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 14px;
+    background: #E5E7EB;
+    color: #6B7280;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: not-allowed;
+    opacity: .9;
+    box-shadow: none;
+}
+
+.disabled-button:hover {
+    transform: none;
+    background: #E5E7EB;
+}
+
+.disabled-button:disabled {
+    opacity: .9;
+    pointer-events: none;
+}
+
+.update-banner{
+
+    position:fixed;
+
+    left:20px;
+    right:20px;
+    bottom:90px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:16px;
+
+    background:#2563EB;
+    color:white;
+
+    border-radius:16px;
+
+    z-index:9999;
+
+    box-shadow:0 12px 30px rgba(0,0,0,.2);
+
+}
+
+.update-banner button{
+
+    background:white;
+
+    color:#2563EB;
+
+    border:none;
+
+    border-radius:12px;
+
+    padding:8px 16px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+}

@@ -371,6 +371,34 @@ Created from: ${action.lesson_title}
 
     },
 
+    showUpdateBanner(worker){
+
+    const banner = document.createElement("div");
+
+    banner.className = "update-banner";
+
+    banner.innerHTML = `
+        <span>
+            🚀 New version available
+        </span>
+
+        <button id="updateApp">
+            Update
+        </button>
+    `;
+
+    document.body.appendChild(banner);
+
+    document
+        .getElementById("updateApp")
+        .onclick = () => {
+
+            worker.postMessage("SKIP_WAITING");
+
+        };
+
+    },
+
     progressRing(completed, total) {
 
     const percent = total === 0

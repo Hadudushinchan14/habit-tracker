@@ -526,7 +526,14 @@ ${module}
 
 ${Lessons
 .filter(l => l.module === module)
-.map(lesson => `
+.map(lesson => {
+
+const unlocked =
+    lesson.id === 1 ||
+    completed.includes(lesson.id) ||
+    completed.includes(lesson.id - 1);
+
+return `
 
 <div class="journal-card">
 
@@ -552,21 +559,38 @@ ${lesson.action}
 
 
 <button
-class="${completed.includes(lesson.id)
+class="${
+completed.includes(lesson.id)
 ? "secondary-button"
-: "primary-button"}"
-onclick="App.openLesson(${lesson.id})"
+: unlocked
+? "primary-button"
+: "disabled-button"
+}"
+onclick="${
+unlocked
+? `App.openLesson(${lesson.id})`
+: ""
+}"
+${unlocked ? "" : "disabled"}
 >
-${completed.includes(lesson.id)
+
+${
+completed.includes(lesson.id)
 ? "✓ Review Lesson"
-: "Start Lesson"}
+: unlocked
+? "Start Lesson"
+: "🔒 Locked"
+}
+
 </button>
 
 
 </div>
 
 
-`).join("")}
+`;
+})
+.join("")}
 
 
 </div>
