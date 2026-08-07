@@ -621,6 +621,27 @@ async deleteIdentity(identityId) {
 
     },
 
+    async logout() {
+
+    const confirmLogout = confirm(
+        "Are you sure you want to log out?"
+    );
+
+    if (!confirmLogout) return;
+
+    const { error } =
+        await supabaseClient.auth.signOut();
+
+    if (error) {
+        console.error(error);
+        UI.showToast("Logout failed");
+        return;
+    }
+
+    location.reload();
+
+    },
+
     saveNote(){
 
 const input =

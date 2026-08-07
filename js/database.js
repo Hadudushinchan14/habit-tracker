@@ -3,6 +3,11 @@ const Database = {
     async init() {
 
     const profile = await getProfile();
+    const {
+    data: { user }
+    } = await supabaseClient.auth.getUser();
+
+State.userEmail = user?.email || "";
 
     if (!profile) {
         return null;

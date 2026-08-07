@@ -107,21 +107,52 @@ const Pages = {
 
     more() {
 
-    return `
+return `
 
-    <div class="container">
+<div class="container">
 
-        <h1>More</h1>
+    <div class="hero">
 
-        <p>
-            Settings coming soon.
+        <p class="greeting">
+            Settings
+        </p>
+
+        <h1 class="headline">
+            More
+        </h1>
+
+        <p class="daily-quote">
+            Manage your account and app.
         </p>
 
     </div>
 
-    ${UI.bottomNav("more")}
+    <div class="stat-card">
 
-    `;
+        <h3>
+            Account
+        </h3>
+
+        <p>
+            Signed in as:
+            <br>
+            ${State.userEmail || ""}
+        </p>
+
+    </div>
+
+    <button
+        class="danger-button"
+        onclick="App.logout()"
+    >
+        Logout
+    </button>
+
+</div>
+
+${UI.bottomNav("more")}
+
+`;
 
     },
 
