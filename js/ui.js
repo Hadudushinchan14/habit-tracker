@@ -1011,31 +1011,83 @@ return `
 
 <div class="login-page">
 
-<h1>Atomic Habit Tracker</h1>
+    <h1>Identity OS</h1>
 
-<input id="loginEmail" placeholder="Email">
+    <p class="login-subtitle">
+        Build your identity one day at a time.
+    </p>
 
-<input 
-id="loginPassword"
-type="password"
-placeholder="Password"
->
+    <input
+        id="loginEmail"
+        type="email"
+        placeholder="Email"
+    >
 
-<button onclick="UI.login()">
-Login
-</button>
+    <input
+        id="loginPassword"
+        type="password"
+        placeholder="Password"
+    >
 
-<button onclick="UI.signup()">
-Create Account
-</button>
+    <button
+        class="primary-button"
+        onclick="UI.login()"
+    >
+        Login
+    </button>
 
-<button onclick="loginWithGoogle()" class="google-btn">
-    Continue with Google
-</button>
+            
+    <button
+        class="secondary-button"
+        onclick="UI.openSignup()"
+    >
+        Create Account
+    </button>
+
+    <button
+        class="google-btn"
+        onclick="loginWithGoogle()"
+    >
+        Continue with Google
+    </button>
+
+    ${this.signupSheet()}
 
 </div>
 
 `;
+
+},
+
+    
+
+    openSignup() {
+
+        
+    const sheet =
+        document.getElementById("signupSheet");
+
+    sheet.classList.remove("hidden");
+    sheet.classList.add("show");
+
+    setTimeout(() => {
+        sheet.classList.add("show");
+     }, 10);
+
+},
+
+
+closeSignup() {
+
+    const sheet =
+        document.getElementById("signupSheet");
+
+    sheet.classList.add("hidden");
+    sheet.classList.add("hidden");
+
+    setTimeout(() => {
+        sheet.classList.add("hidden");
+    }, 250);
 
     },
 
@@ -1065,30 +1117,112 @@ Create Account
 async signup() {
 
     const email =
-        document.getElementById("loginEmail").value.trim();
+        document.getElementById("signupEmail")
+        .value
+        .trim();
 
     const password =
-        document.getElementById("loginPassword").value.trim();
+        document.getElementById("signupPassword")
+        .value
+        .trim();
+
+    const confirm =
+        document.getElementById("signupConfirm")
+        .value
+        .trim();
+
 
     console.log({ email, password });
+
 
     if (!email) {
         UI.showToast("Enter your email.");
         return;
     }
 
+
     if (!password) {
         UI.showToast("Enter your password.");
         return;
     }
 
-    const user = await createAccount(email, password);
 
-    if (user) {
-        UI.showToast("Account created. Check your email.");
+    if (password !== confirm) {
+        UI.showToast("Passwords do not match.");
+        return;
     }
 
+
+    const user = await createAccount(email, password);
+
+
+    if (user) {
+
+        UI.showToast(
+            "Account created. Check your email."
+        );
+
+        this.closeSignup();
+
+    }
+
+    },
+
+    signupSheet() {
+
+return `
+
+<div id="signupSheet" class="bottom-sheet">
+
+    <div class="sheet-handle"></div>
+
+    <h2>
+        Create Account
+    </h2>
+
+    <input
+        id="signupEmail"
+        type="email"
+        placeholder="Email"
+    >
+
+    <input
+        id="signupPassword"
+        type="password"
+        placeholder="Password"
+    >
+
+    <input
+        id="signupConfirm"
+        type="password"
+        placeholder="Confirm Password"
+    >
+
+    <div class="sheet-actions">
+
+        <button
+            class="primary-button"
+            onclick="UI.signup()"
+        >
+            Create Account
+        </button>
+
+        <button
+            class="secondary-button"
+            onclick="UI.closeSignup()"
+        >
+            Cancel
+        </button>
+
+    </div>
+
+</div>
+
+`;
+
 },
+
+
 
     lessonDetail(id){
 
