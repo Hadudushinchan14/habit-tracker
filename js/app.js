@@ -743,14 +743,41 @@ UI.showToast("Note saved 🌱");
 
     };
 
+   if ("serviceWorker" in navigator) {
+
+    navigator.serviceWorker
+        .register("./service-worker.js")
+        .then(registration => {
+
+            registration.addEventListener("updatefound", () => {
+
+                const newWorker = registration.installing;
+
+                if (!newWorker) return;
+
+                newWorker.addEventListener("statechange", () => {
+
+                    if (
+                        newWorker.state === "installed" &&
+                        navigator.serviceWorker.controller
+                    ) {
+                        UI.showUpdateBanner(newWorker);
+                    }
+
+                });
+
+            });
+
+        });
+
     navigator.serviceWorker.addEventListener(
-    "controllerchange",
-    () => {
-
-        window.location.reload();
-
-    }
+        "controllerchange",
+        () => {
+            window.location.reload();
+        }
     );
+
+}
 
 
 
