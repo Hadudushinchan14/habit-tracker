@@ -61,6 +61,24 @@ async function getProfile() {
 
 }
 
+async function getIdentities(profileId) {
+
+    const { data, error } = await supabaseClient
+        .from("identities")
+        .select(`
+            *,
+            actions (*)
+        `)
+        .eq("profile_id", profileId);
+
+    if (error) {
+        console.error(error);
+        return [];
+    }
+
+    return data;
+}
+
 
 async function login(email, password) {
 
