@@ -1264,8 +1264,8 @@ z-index: 100;
 }
 
 .login-logo {
-    width: 250px;
-    height:250px;
+    width: 220px;
+    height:220px;
     object-fit: contain;
     display: block;
     margin: 0 auto 32px;
