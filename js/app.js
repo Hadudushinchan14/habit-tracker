@@ -80,7 +80,7 @@ responseInput
 : "";
 
 const title =
-response || lesson.title;
+lesson.action || response || lesson.title;
 
 
 const subtitleInput =

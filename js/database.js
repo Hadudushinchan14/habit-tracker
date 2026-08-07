@@ -18,10 +18,14 @@ State.userEmail = user?.email || "";
 
     await this.loadIdentities();
 
-    if (State.identities.length) {
-        State.currentIdentityId = State.identities[0].id;
-        State.profile.identity = State.identities[0].name;
-    }
+if (State.identities.length) {
+    State.currentIdentityId = State.identities[0].id;
+    State.profile.identity = State.identities[0].name;
+}
+
+if (State.currentIdentityId) {
+    await this.loadActions();
+}
 
     await this.loadActions();
     await this.loadHistory();
@@ -34,6 +38,8 @@ State.userEmail = user?.email || "";
     },
     
     async loadActions() {
+
+       console.log("ACTIONS LOADED:", State.actions);
 
     if (!State.currentIdentityId) {
         State.actions = [];
@@ -120,7 +126,7 @@ State.lessonProgress = data || [];
 
     },
 
-    async loadIdentities() {
+   async loadIdentities() {
 
     const { data, error } = await supabaseClient
         .from("identities")
@@ -136,7 +142,6 @@ State.lessonProgress = data || [];
     State.identities = data || [];
 
     }
-
 };
 
 window.Database = Database;

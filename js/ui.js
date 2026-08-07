@@ -1336,6 +1336,13 @@ return `
 ${lesson.module}
 </p>
 
+<button
+        class="secondary-button"
+        onclick="App.navigate('learn')"
+    >
+        ← Back
+    </button>
+
 
 <h1 class="headline">
 ${lesson.title}

@@ -145,3 +145,4 @@ window.supabaseClient = supabaseClient;
 window.login = login;
 window.createAccount = createAccount;
 window.loginWithGoogle = loginWithGoogle;
+window.getIdentities = getIdentities;
