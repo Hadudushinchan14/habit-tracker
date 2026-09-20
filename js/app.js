@@ -3,22 +3,12 @@ const App = {
     currentPage: "today",
 
     render() {
-
-    
-    if(!State.currentIdentityId){
-
-    document.getElementById("app").innerHTML =
-        Pages.onboarding();
-
-    return;
-
-    }
-
-
-    document.getElementById("app").innerHTML =
-    Pages[this.currentPage]();
-
-
+        if (!State.currentIdentityId) {
+            document.getElementById("app").innerHTML = Pages.onboarding();
+            return;
+        }
+        document.getElementById("app").innerHTML = Pages[this.currentPage]();
+        State.ui.currentPage = this.currentPage;
     },
 
     navigate(page) {
@@ -27,802 +17,488 @@ const App = {
     },
 
     changeIdentity() {
-
-    document.getElementById("app").innerHTML =
-    Pages.onboarding();
-
+        document.getElementById("app").innerHTML = Pages.onboarding();
     },
 
-    async completeLesson(id){
+    async completeLesson(id) {
+        const lesson = Lessons.find(l => l.id === id);
+        const alreadyCreated = State.actions.some(a => a.lesson_id === id);
 
-    const lesson = Lessons.find(
-        l => l.id === id
-    );
+        if (alreadyCreated) {
+            UI.showToast("Habit already created");
+            this.navigate("today");
+            return;
+        }
 
-    const alreadyCreated =
-    State.actions.some(
-        a => a.lesson_id === id
-    );
+        if (!lesson) return;
 
-if (alreadyCreated) {
-
-    UI.showToast("Habit already created 🌱");
-
-    this.navigate("today");
-
-    return;
-
-}
-
-  
-    if (!lesson) return;
-
-    lesson.completed = true;
-
-    this.render();
-
+        // Mark lesson as completed in progress
+        await this.saveLessonProgress(id, "");
+        this.render();
     },
 
-    async createHabitFromLesson(id){
-
-        
-const lesson = Lessons.find(
-    l => l.id === id
-);
-
-
-const responseInput =
-document.getElementById("lessonResponse");
-
-const response =
-responseInput
-? responseInput.value.trim()
-: "";
-
-const title =
-lesson.action || response || lesson.title;
-
-
-const subtitleInput =
-document.getElementById("lessonSubtitle");
-
-const subtitle =
-subtitleInput
-? subtitleInput.value.trim()
-: "";
-
-
-if(!title){
-
-UI.showToast("Create your habit first");
-
-return;
-
-}
-
-
-const { data, error } = await supabaseClient
-.from("actions")
-.insert({
-
-profile_id: State.profile.id,
-
-identity_id: State.currentIdentityId,
-
-title:title,
-
-subtitle:subtitle || lesson.title,
-
-description: lesson.principle,
-
-is_counter:false,
-
-completed:false,
-
-lesson_id: lesson.id,
-
-lesson_title: lesson.title
-
-})
-.select()
-.single();
-
-
-
-if(error){
-
-console.error(error);
-
-UI.showToast("Failed creating habit");
-
-return;
-
-}
-
-
-const { data: progressData, error: progressError } = await supabaseClient
-.from("lesson_progress")
-.upsert({
-    profile_id: State.profile.id,
-    identity_id: State.currentIdentityId,
-    lesson_id: lesson.id,
-    response: response
-},{
-    onConflict: "identity_id,lesson_id"
-})
-
-.select()
-.single();
-
-console.log("PROGRESS SAVED:", progressData);
-console.log("PROGRESS ERROR:", progressError);
-
-if (progressError) {
-    console.error(progressError);
-}
-
-await Database.loadLessonProgress();
-
-await Database.loadActions();
-
-UI.showToast("Habit created 🌱");
-
-this.navigate("today");
-
-},
-
-
-
-    openLesson(id){
-
-    const page = UI.lessonDetail(id);
-
-    document.getElementById("app").innerHTML = page;
-
-    },
-
-
-    async toggleAction(id) {
-
-    const action = State.actions.find(
-        a => a.id === id
-    );
-
-    if (!action) return;
-
-    action.completed = !action.completed;
-
-    const today = new Date()
-        .toISOString()
-        .split("T")[0];
-
-    if (action.completed) {
-
-        await supabaseClient
-    .from("history")
-    .upsert({
-        profile_id: State.profile.id,
-        identity_id: State.currentIdentityId,
-        action_id: id,
-        date: today,
-        completed: true
-    },{
-    onConflict: "identity_id,action_id,date"
-    });
-
-    } else {
-
-        await supabaseClient
-    .from("history")
-    .delete()
-    .eq("profile_id", State.profile.id)
-    .eq("identity_id", State.currentIdentityId)
-    .eq("action_id", id)
-    .eq("date", today);
-
-    }
-
-    await Database.loadHistory();
-
-    this.render();
-
-    UI.showToast(
-    action.completed
-    ? "🔥 Action completed"
-    : "Action unchecked"
-    );
-
-    },
-
-    async saveCounter(actionId, value) {
-
-    const today = new Date()
-        .toISOString()
-        .split("T")[0];
-
-    await supabaseClient
-        .from("history")
-        .upsert({
+    async createHabitFromLesson(id) {
+        const lesson = Lessons.find(l => l.id === id);
+        const responseInput = document.getElementById("lessonResponse");
+        const response = responseInput ? responseInput.value.trim() : "";
+        const subtitleInput = document.getElementById("lessonSubtitle");
+        const subtitle = subtitleInput ? subtitleInput.value.trim() : "";
+        const title = lesson.action || response || lesson.title;
+
+        if (!title) {
+            UI.showToast("Create your habit first");
+            return;
+        }
+
+        const habitData = {
             profile_id: State.profile.id,
             identity_id: State.currentIdentityId,
-            action_id: actionId,
-            date: today,
-            completed: value > 0,
-            value: value
-        }, {
-            onConflict: "identity_id,action_id,date"
-        });
+            title,
+            subtitle: subtitle || lesson.title,
+            description: lesson.principle,
+            is_counter: false,
+            completed: false,
+            habit_type: "binary",
+            lesson_id: lesson.id,
+            lesson_title: lesson.title,
+            minimum: "",
+            normal: "",
+            stretch: "",
+            cue: "",
+            location: "",
+            environment: "",
+            time: "",
+            days: [0,1,2,3,4,5,6]
+        };
 
+        const { data, error } = await supabaseClient.from("actions").insert(habitData).select().single();
+
+        if (error) {
+            console.error(error);
+            UI.showToast("Failed creating habit");
+            return;
+        }
+
+        await supabaseClient.from("lesson_progress").upsert({
+            profile_id: State.profile.id,
+            identity_id: State.currentIdentityId,
+            lesson_id: lesson.id,
+            response
+        }, { onConflict: "identity_id,lesson_id" });
+
+        await Database.loadLessonProgress();
+        await Database.loadActions();
+
+        UI.showToast("Habit created");
+        this.navigate("today");
     },
 
-    changeCounter(id, amount) {
+    openLesson(id) {
+        const lesson = Lessons.find(l => l.id === id);
+        if (!lesson) return;
+        const page = UI.lessonDetail(id);
+        document.getElementById("app").innerHTML = page;
+    },
 
-    const input = document.getElementById(`counter-${id}`);
+    async toggleAction(id) {
+        const action = State.actions.find(a => a.id === id);
+        if (!action) return;
 
-    if (!input) return;
+        const today = Helpers.todayISO();
+        const existing = State.history.find(h => h.action_id === id && h.identity_id === State.currentIdentityId && h.date === today);
 
-    let value = Number(input.value) || 0;
+        if (existing) {
+            // Uncomplete - delete history record
+            const { error } = await supabaseClient.from("history").delete().eq("id", existing.id);
+            if (error) {
+                console.error(error);
+                UI.showToast("Failed to update");
+                return;
+            }
+            State.history = State.history.filter(h => h.id !== existing.id);
+        } else {
+            // Complete - insert history record
+            const { data, error } = await supabaseClient.from("history").insert({
+                profile_id: State.profile.id,
+                identity_id: State.currentIdentityId,
+                action_id: id,
+                date: today,
+                value: action.is_counter ? 1 : null
+            }).select().single();
 
-    value += amount;
+            if (error) {
+                console.error(error);
+                UI.showToast("Failed to complete");
+                return;
+            }
+            State.history.push(data);
+        }
 
-    if (value < 0) value = 0;
+        this.render();
+    },
 
-    input.value = value;
-
+    async changeCounter(id, delta) {
+        const input = document.getElementById(`counter-${id}`);
+        if (!input) return;
+        const current = parseInt(input.value) || 0;
+        const next = Math.max(0, current + delta);
+        input.value = next;
     },
 
     async saveCounterFromInput(id) {
+        const input = document.getElementById(`counter-${id}`);
+        if (!input) return;
+        const value = parseInt(input.value) || 0;
+        const today = Helpers.todayISO();
 
-    const input = document.getElementById(`counter-${id}`);
+        const existing = State.history.find(h => h.action_id === id && h.identity_id === State.currentIdentityId && h.date === today);
 
-    if (!input) return;
+        if (existing) {
+            const { error } = await supabaseClient.from("history").update({ value }).eq("id", existing.id);
+            if (error) {
+                console.error(error);
+                UI.showToast("Failed to save");
+                return;
+            }
+            existing.value = value;
+        } else {
+            const { data, error } = await supabaseClient.from("history").insert({
+                profile_id: State.profile.id,
+                identity_id: State.currentIdentityId,
+                action_id: id,
+                date: today,
+                value
+            }).select().single();
 
-    const value = Math.max(0, Number(input.value) || 0);
+            if (error) {
+                console.error(error);
+                UI.showToast("Failed to save");
+                return;
+            }
+            State.history.push(data);
+        }
 
-    await this.saveCounter(id, value);
-
-    await Database.loadHistory();
-
-    this.render();
-
-    UI.showToast("Counter saved 💪");
-
+        UI.showToast("Saved");
+        this.render();
     },
 
-     openSheet(id = null) {
+    async saveHabit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
 
-    State.editingActionId = id;
+        const habitData = {
+            profile_id: State.profile.id,
+            identity_id: State.currentIdentityId,
+            title: formData.get('habitTitle')?.trim(),
+            subtitle: formData.get('habitWhy')?.trim(),
+            habit_type: formData.get('habitType') || 'binary',
+            is_counter: ['count', 'duration', 'quantity'].includes(formData.get('habitType')),
+            target: formData.get('target') ? parseInt(formData.get('target')) : null,
+            unit: formData.get('unit') || '',
+            time: formData.get('time') || '',
+            days: formData.getAll('days').map(d => parseInt(d)).sort((a,b) => a-b),
+            location: formData.get('location')?.trim(),
+            cue: formData.get('cue')?.trim(),
+            minimum: formData.get('minimum')?.trim(),
+            normal: formData.get('normal')?.trim(),
+            stretch: formData.get('stretch')?.trim(),
+            environment: formData.get('environment')?.trim(),
+            completed: false
+        };
 
-    const sheet = document.getElementById("addSheet");
+        if (!habitData.title) {
+            UI.showToast("Habit name is required");
+            return;
+        }
 
-    if (id) {
+        let result;
+        if (State.editingActionId) {
+            // Update existing
+            const { data, error } = await supabaseClient.from("actions").update(habitData).eq("id", State.editingActionId).select().single();
+            if (error) {
+                console.error(error);
+                UI.showToast("Failed to update habit");
+                return;
+            }
+            result = data;
+            UI.showToast("Habit updated");
+        } else {
+            // Create new
+            const { data, error } = await supabaseClient.from("actions").insert(habitData).select().single();
+            if (error) {
+                console.error(error);
+                UI.showToast("Failed to create habit");
+                return;
+            }
+            result = data;
+            UI.showToast("Habit created");
+        }
 
-        const action = State.actions.find(a => a.id === id);
-
-        document.getElementById("actionTitle").value =
-            action.title;
-
-        document.getElementById("actionSubtitle").value =
-    action.lesson_id ? "" : (action.subtitle || "");
-        
-        document.getElementById("actionDescription").value =
-            action.description || "";
-
-        document.getElementById("actionIsCounter").checked =
-            action.is_counter || false;
-
-        document.getElementById("deleteAction").style.display =
-            "block";
-
-    } else {
-
-        document.getElementById("actionTitle").value = "";
-
-        document.getElementById("actionSubtitle").value = "";
-
-        document.getElementById("actionDescription").value = "";
-
-        document.getElementById("actionIsCounter").checked = false;
-
-        document.getElementById("deleteAction").style.display =
-            "none";
-
-    }
-
-    sheet.classList.remove("hidden");
-
-    requestAnimationFrame(() => {
-        sheet.classList.add("show");
-    });
-
+        UI.closeSheet();
+        await Database.loadActions();
+        this.render();
     },
 
-closeSheet() {
-
-    const sheet = document.getElementById("addSheet");
-
-    sheet.classList.remove("show");
-
-    setTimeout(() => {
-        sheet.classList.add("hidden");
-    },300);
-
+    openSheet(actionId = null) {
+        UI.openSheet(actionId);
     },
 
-   async saveAction() {
-
-    const title = document
-        .getElementById("actionTitle")
-        .value
-        .trim();
-
-    const subtitle = document
-        .getElementById("actionSubtitle")
-        .value
-        .trim();
-
-    const description = document
-        .getElementById("actionDescription")
-        .value
-        .trim();
-
-    const isCounter = document
-        .getElementById("actionIsCounter")
-        .checked;
-
-    if (!title) return;
-
-    if (State.editingActionId) {
-
-    const { error } = await supabaseClient
-        .from("actions")
-        .update({
-            title,
-            subtitle,
-            description,
-            is_counter: isCounter
-})
-        .eq("id", State.editingActionId);
-
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-} else {
-
-    const { error } = await supabaseClient
-         .from("actions")
-         .insert({
-         profile_id: State.profile.id,
-         title: title,
-         subtitle: subtitle,
-         description: description,
-         is_counter: isCounter,
-         completed: false,
-         identity_id: State.currentIdentityId
-});
-        
-
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-}
-    State.editingActionId = null;
-
-    await Database.loadActions();
-
-    this.closeSheet();
-
-    this.render();
-
+    closeSheet() {
+        UI.closeSheet();
+        State.editingActionId = null;
     },
 
-    async deleteAction() {
-
-    if (!State.editingActionId) return;
-
-    const { error } = await supabaseClient
-        .from("actions")
-        .delete()
-        .eq("id", State.editingActionId);
-
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    State.editingActionId = null;
-
-    await Database.loadActions();
-
-    this.closeSheet();
-
-    this.render();
-
+    selectIdentity(identityId) {
+        State.currentIdentityId = identityId;
+        const identity = State.identities.find(i => i.id === identityId);
+        if (identity) State.profile.identity = identity.name;
+        this.reloadIdentityData();
     },
 
-    async saveReflection() {
-
-    const today = new Date()
-    .toISOString()
-    .split("T")[0];
-
-
-const reflection = {
-
-    profile_id: State.profile.id,
-
-    identity_id: State.currentIdentityId,
-
-    reflection_date: today,
-
-    win: document.getElementById("winReflection").value,
-
-    challenge: document.getElementById("challengeReflection").value,
-
-    tomorrow: document.getElementById("tomorrowReflection").value
-
-};
-    const { data, error } = await supabaseClient
-    .from("reflections")
-    .upsert(reflection,{
-        onConflict: "identity_id,reflection_date"
-    })
-    .select()
-    .single();
-
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    State.reflections.unshift(data);
-
-    UI.showToast("Reflection saved 🌱");
-
-},
+    async reloadIdentityData() {
+        await Promise.all([
+            Database.loadActions(),
+            Database.loadHistory(),
+            Database.loadReflections(),
+            Database.loadLessonProgress()
+        ]);
+        State.completedLessons = State.lessonProgress.map(p => p.lesson_id);
+        this.render();
+    },
 
     async createIdentity() {
+        const name = prompt("What identity are you building?", "I am becoming someone who...");
+        if (!name?.trim()) return;
 
-    const name = prompt("Identity name:");
-
-    if (!name) return;
-
-
-    const { data, error } = await supabaseClient
-        .from("identities")
-        .insert({
+        const { data, error } = await supabaseClient.from("identities").insert({
             profile_id: State.profile.id,
-            name: name
-        })
-        .select()
-        .single();
+            name: name.trim()
+        }).select().single();
 
+        if (error) {
+            console.error(error);
+            UI.showToast("Failed to create identity");
+            return;
+        }
 
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-
-    State.identities.push(data);
-
-    State.currentIdentityId = data.id;
-    State.profile.identity = data.name;
-
-    await Database.loadActions();
-    await Database.loadHistory();
-    await Database.loadReflections();
-    await Database.loadLessonProgress();
-
-    this.navigate("today");
-
-    },
-
-    async chooseIdentity(identityId) {
-
-        const identity = State.identities.find(
-        i => i.id === identityId
-    );
-
-         if (!identity) return;
-
-    State.currentIdentityId = identity.id;
-
-    State.profile.identity = identity.name;
-
-    
-    await Database.loadActions();
-    await Database.loadHistory();
-    await Database.loadReflections();
-    await Database.loadLessonProgress();
-
-    this.navigate("today");
-
-    
+        await Database.loadIdentities();
+        State.currentIdentityId = data.id;
+        State.profile.identity = data.name;
+        this.render();
     },
 
     async editIdentity(identityId) {
+        const identity = State.identities.find(i => i.id === identityId);
+        if (!identity) return;
+        const name = prompt("Edit identity:", identity.name);
+        if (!name?.trim() || name.trim() === identity.name) return;
 
-        const identity = State.identities.find(
-        i => i.id === identityId
-    );
+        const { error } = await supabaseClient.from("identities").update({ name: name.trim() }).eq("id", identityId);
+        if (error) {
+            console.error(error);
+            UI.showToast("Failed to update identity");
+            return;
+        }
 
-          if (!identity) return;
-
-    const name = prompt(
-        "Edit identity name:",
-        identity.name
-    );
-
-    if (!name || name === identity.name) return;
-
-
-    const { error } = await supabaseClient
-        .from("identities")
-        .update({
-            name
-        })
-        .eq("id", identityId);
-
-
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-
-    await Database.loadIdentities();
-
-    this.render();
-
+        await Database.loadIdentities();
+        if (State.currentIdentityId === identityId) State.profile.identity = name.trim();
+        this.render();
     },
 
+    async deleteIdentity(identityId) {
+        if (!confirm("Delete this identity and all its habits? This cannot be undone.")) return;
+        const { error } = await supabaseClient.from("identities").delete().eq("id", identityId);
+        if (error) {
+            console.error(error);
+            UI.showToast("Failed to delete identity");
+            return;
+        }
+        await Database.loadIdentities();
+        if (State.currentIdentityId === identityId) {
+            State.currentIdentityId = State.identities[0]?.id || null;
+            State.profile.identity = State.identities[0]?.name || null;
+        }
+        this.render();
+    },
 
-async deleteIdentity(identityId) {
+    async saveReflection(event) {
+        event.preventDefault();
+        const form = event.target;
+        const today = Helpers.todayISO();
 
-    const identity = State.identities.find(
-        i => i.id === identityId
-    );
+        const reflectionData = {
+            profile_id: State.profile.id,
+            identity_id: State.currentIdentityId,
+            reflection_date: today,
+            win: form.win?.value?.trim() || '',
+            challenge: form.challenge?.value?.trim() || '',
+            tomorrow: form.tomorrow?.value?.trim() || ''
+        };
 
-    if (!identity) return;
+        const existing = State.reflections.find(r => r.reflection_date === today && r.identity_id === State.currentIdentityId);
 
+        if (existing) {
+            const { error } = await supabaseClient.from("reflections").update(reflectionData).eq("id", existing.id);
+            if (error) {
+                console.error(error);
+                UI.showToast("Failed to save reflection");
+                return;
+            }
+            Object.assign(existing, reflectionData);
+        } else {
+            const { data, error } = await supabaseClient.from("reflections").insert(reflectionData).select().single();
+            if (error) {
+                console.error(error);
+                UI.showToast("Failed to save reflection");
+                return;
+            }
+            State.reflections.push(data);
+        }
 
-    const confirmDelete = confirm(
-        `Delete "${identity.name}"?`
-    );
+        UI.showToast("Reflection saved");
+        this.render();
+    },
 
-    if (!confirmDelete) return;
+    async saveLessonProgress(lessonId, response) {
+        const { error } = await supabaseClient.from("lesson_progress").upsert({
+            profile_id: State.profile.id,
+            identity_id: State.currentIdentityId,
+            lesson_id: lessonId,
+            response
+        }, { onConflict: "identity_id,lesson_id" });
+        if (error) console.error(error);
+        await Database.loadLessonProgress();
+        State.completedLessons = State.lessonProgress.map(p => p.lesson_id);
+    },
 
+    openDayModal(date) {
+        const actions = State.history
+            .filter(h => h.date === date && h.identity_id === State.currentIdentityId)
+            .map(h => {
+                const action = State.actions.find(a => a.id === h.action_id);
+                return action ? (action.is_counter ? `🔢 ${Helpers.escapeHtml(action.title)}: ${h.value ?? 0}` : `✓ ${Helpers.escapeHtml(action.title)}`) : null;
+            })
+            .filter(Boolean);
 
-    const { error } = await supabaseClient
-        .from("identities")
-        .delete()
-        .eq("id", identityId);
+        const reflection = State.reflections.find(r => r.reflection_date === date && r.identity_id === State.currentIdentityId);
 
+        document.getElementById("dayModalTitle").textContent = Helpers.formatDate(Helpers.parseISODate(date), { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
-    if (error) {
-        console.error(error);
-        return;
-    }
+        document.getElementById("dayModalContent").innerHTML = `
+            ${actions.length ? actions.map(a => `<div class="modal-habit">${a}</div>`).join('') : '<p>No completed actions</p>'}
+            ${reflection ? `
+            <div class="modal-reflection">
+                <h3>Reflection</h3>
+                <p><strong>Win:</strong><br>${Helpers.escapeHtml(reflection.win || '')}</p>
+                <p><strong>Challenge:</strong><br>${Helpers.escapeHtml(reflection.challenge || '')}</p>
+                <p><strong>Tomorrow:</strong><br>${Helpers.escapeHtml(reflection.tomorrow || '')}</p>
+            </div>` : ''}
+        `;
 
+        document.getElementById("dayModal").classList.remove("hidden");
+    },
 
-    if (State.currentIdentityId === identityId) {
-        State.currentIdentityId = null;
-    }
-
-
-    await Database.loadIdentities();
-
-    this.render();
-
+    closeDayModal() {
+        document.getElementById("dayModal").classList.add("hidden");
     },
 
     async logout() {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) console.error(error);
+        // Clear state
+        Object.keys(State).forEach(key => {
+            if (Array.isArray(State[key])) State[key] = [];
+            else if (typeof State[key] === 'object' && State[key] !== null) {
+                Object.keys(State[key]).forEach(k => State[key][k] = State[key][k] === State.profile.identity || State[key][k] === State.currentIdentityId ? null : State[key][k]);
+            }
+        });
+        State.profile.id = null;
+        State.profile.identity = null;
+        State.currentIdentityId = null;
+        State.userEmail = '';
+        document.getElementById("app").innerHTML = UI.loginPage();
+    },
 
-    const confirmLogout = confirm(
-        "Are you sure you want to log out?"
-    );
+    exportData() {
+        const data = {
+            profile: State.profile,
+            identities: State.identities,
+            actions: State.actions,
+            history: State.history,
+            reflections: State.reflections,
+            lessonProgress: State.lessonProgress,
+            exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `habit-tracker-export-${Helpers.todayISO()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        UI.showToast("Data exported");
+    },
 
-    if (!confirmLogout) return;
+    confirmDeleteAccount() {
+        if (confirm("Delete your account and all data? This cannot be undone.")) {
+            this.deleteAccount();
+        }
+    },
 
-    const { error } =
-        await supabaseClient.auth.signOut();
+    async deleteAccount() {
+        const user = await getUser();
+        if (!user) return;
+        // Delete all user data (cascades if FKs set up)
+        await supabaseClient.from("history").delete().eq("profile_id", State.profile.id);
+        await supabaseClient.from("reflections").delete().eq("profile_id", State.profile.id);
+        await supabaseClient.from("actions").delete().eq("profile_id", State.profile.id);
+        await supabaseClient.from("lesson_progress").delete().eq("profile_id", State.profile.id);
+        await supabaseClient.from("identities").delete().eq("profile_id", State.profile.id);
+        await supabaseClient.from("profiles").delete().eq("id", State.profile.id);
+        await supabaseClient.auth.admin.deleteUser(user.id); // Requires service role
+        // Fallback: just sign out
+        await this.logout();
+    },
 
-    if (error) {
-        console.error(error);
-        UI.showToast("Logout failed");
-        return;
+    openTimezoneSettings() {
+        const tz = prompt("Enter timezone (e.g., America/New_York, Europe/London):", State.userTimezone);
+        if (tz && Intl.DateTimeFormat().resolvedOptions().timeZone) {
+            // Validate timezone
+            try {
+                new Intl.DateTimeFormat('en-US', { timeZone: tz });
+                State.userTimezone = tz;
+                UI.showToast("Timezone updated");
+                this.render();
+            } catch {
+                UI.showToast("Invalid timezone");
+            }
+        }
     }
 
-    location.reload();
+};
 
-    },
+window.App = App;
 
-    saveNote(){
-
-const input =
-document.getElementById("habitNote");
-
-
-const note =
-input.value.trim();
-
-
-if(!note) return;
-
-
-State.notes.unshift(note);
-
-
-input.value = "";
-
-
-this.render();
-
-
-UI.showToast("Note saved 🌱");
-
-    },
-
-    openDay(date){
-
-        const actions = State.history
-        .filter(h =>
-        h.date === date &&
-        h.identity_id === State.currentIdentityId
-        )
-        .map(h => {
-
-            const action = State.actions.find(
-                a => a.id === h.action_id
-            );
-
-            return action
-                    ? action.is_counter
-                    ? `🔢 ${action.title}: ${h.value ?? 0}`
-                    : `✓ ${action.title}`
-                : null;
-
-        })
-        .filter(Boolean);
-
-
-    const reflection = State.reflections.find(r =>
-    r.reflection_date === date &&
-    r.identity_id === State.currentIdentityId
-    );
-
-
-    document.getElementById("dayModalTitle")
-        .innerHTML = date;
-
-
-    document.getElementById("dayModalContent")
-        .innerHTML = `
-            ${
-            actions.length
-            ?
-            actions.map(a => `
-                <div class="modal-habit">
-                    ${a}
-                </div>
-            `).join("")
-            :
-            "<p>No completed actions</p>"
-            }
-
-
-            ${
-            reflection
-            ?
-            `
-            <div class="modal-reflection">
-
-                <h3>Reflection</h3>
-
-                <p>
-                <strong>Win:</strong><br>
-                ${reflection.win || ""}
-                </p>
-
-                <p>
-                <strong>Challenge:</strong><br>
-                ${reflection.challenge || ""}
-                </p>
-
-                <p>
-                <strong>Tomorrow:</strong><br>
-                ${reflection.tomorrow || ""}
-                </p>
-
-            </div>
-            `
-            :
-            ""
-            }
-        `;
-
-    
-
-
-    document
-    .getElementById("dayModal")
-    .classList.remove("hidden");
-        },
-
-
-        closeDayModal(){
-
-    document
-    .getElementById("dayModal")
-    .classList.add("hidden");
-        }
-
-    };
-
-   if ("serviceWorker" in navigator) {
-
-    navigator.serviceWorker
-        .register("./service-worker.js")
-        .then(registration => {
-
-            registration.addEventListener("updatefound", () => {
-
-                const newWorker = registration.installing;
-
-                if (!newWorker) return;
-
-                newWorker.addEventListener("statechange", () => {
-
-                    if (
-                        newWorker.state === "installed" &&
-                        navigator.serviceWorker.controller
-                    ) {
-                        UI.showUpdateBanner(newWorker);
-                    }
-
-                });
-
-            });
-
-        });
-
-    navigator.serviceWorker.addEventListener(
-        "controllerchange",
-        () => {
-            window.location.reload();
-        }
-    );
-
-}
-
-
-
-
-
- window.App = App;
-
+// Auth initialization
 (async () => {
-
-    const {
-        data: { session }
-    } = await supabaseClient.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
 
     if (!session) {
-
-        document.getElementById("app").innerHTML =
-            UI.loginPage();
-
+        document.getElementById("app").innerHTML = UI.loginPage();
         return;
-
     }
 
+    // Listen for auth changes
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT' || !session) {
+            document.getElementById("app").innerHTML = UI.loginPage();
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            // Re-initialize
+            Database.init().then(() => App.render());
+        }
+    });
+
     await Database.init();
-
     App.render();
-
 })();
