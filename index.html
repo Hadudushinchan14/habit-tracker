@@ -67,11 +67,32 @@
 
 <script>
 
-if ("serviceWorker" in navigator) {
+   if ("serviceWorker" in navigator) {
 
-    navigator.serviceWorker.register(
-        "service-worker.js"
-    );
+    navigator.serviceWorker
+        .register("./service-worker.js")
+        .then(registration => {
+
+            registration.addEventListener("updatefound", () => {
+
+                const newWorker = registration.installing;
+
+                newWorker.addEventListener("statechange", () => {
+
+                    if (
+                        newWorker.state === "installed" &&
+                        navigator.serviceWorker.controller
+                    ) {
+
+                        UI.showUpdateBanner(newWorker);
+
+                    }
+
+                });
+
+            });
+
+        });
 
 }
 
