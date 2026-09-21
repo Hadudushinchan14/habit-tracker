@@ -1,26 +1,77 @@
-:root{
+/* ==========================
+   Design Tokens — Identity OS
+   Calm, professional, restrained
+   ========================== */
+:root {
+  /* Brand */
+  --brand: #2563EB;
+  --brand-hover: #1D4ED8;
+  --brand-light: #DBEAFE;
+  --brand-soft: #EFF6FF;
 
---bg:#FAFAF8;
---surface:#FFFFFF;
---surface-alt:#F5F5F4;
+  /* Semantic */
+  --success: #059669;
+  --success-light: #D1FAE5;
+  --warning: #D97706;
+  --warning-light: #FEF3C7;
+  --danger: #DC2626;
+  --danger-light: #FEE2E2;
+  --danger-hover: #FECACA;
 
---text:#111827;
---text-light:#6B7280;
+  /* Surfaces */
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --surface-alt: #F1F5F9;
+  --surface-hover: #E2E8F0;
 
---primary:#6BA368;
---primary-light:#E7F3E6;
+  /* Borders */
+  --border: #E2E8F0;
+  --border-light: #F1F5F9;
 
---accent:#4F8EF7;
+  /* Text */
+  --text: #1E293B;
+  --text-light: #64748B;
+  --text-muted: #94A3B8;
 
---border:#E5E7EB;
+  /* Radii — restrained */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
 
---radius-sm:16px;
---radius:24px;
---radius-lg:32px;
+  /* Shadows — subtle */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  --shadow: 0 2px 8px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.05);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08), 0 16px 48px rgba(0,0,0,0.06);
 
---shadow:
-0 10px 30px rgba(0,0,0,.06);
+  /* Transitions */
+  --transition: 0.15s ease;
+  --transition-slow: 0.25s ease;
 
---transition:.25s;
+  /* Typography */
+  --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Consolas", monospace;
 
+  /* Spacing (8pt) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Layout */
+  --max-width: 560px;
+  --nav-height: 64px;
+  --header-height: 56px;
+
+  /* Progress */
+  --progress: 0deg;
 }

@@ -2,6 +2,10 @@ const App = {
     currentPage: "today",
 
     render() {
+        if (State.loading.profile) {
+            document.getElementById("app").innerHTML = '<div class="container" style="padding-top:120px;"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div></div>';
+            return;
+        }
         if (!State.currentIdentityId) {
             document.getElementById("app").innerHTML = Pages.onboarding();
             return;
