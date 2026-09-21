@@ -1,66 +1,34 @@
 const UI = {
-
-    button(label, className = "primary-button", action = "") {
-        return `<button class="${className}" onclick="${action}">${label}</button>`;
-    },
-
-    sectionHeader(title, right = "") {
-        return `<div class="section-header"><h2>${title}</h2>${right}</div>`;
-    },
-
-    identityCard(identity) {
-        const safeIdentity = Helpers.escapeHtml(identity || "Not set");
-        return `<div class="identity-card"><div class="identity-label">WHO ARE YOU BECOMING?</div><div class="identity-title">${safeIdentity}</div><div class="identity-quote">Every action today is another vote for your future self.</div></div>`;
-    },
+    button(label, className = "primary-button", action = "") { return `<button class="${className}" onclick="${action}">${label}</button>`; },
+    sectionHeader(title, right = "") { return `<div class="section-header"><h2>${title}</h2>${right}</div>`; },
+    identityCard(identity) { const safeIdentity = Helpers.escapeHtml(identity || "Not set"); return `<div class="identity-card"><div class="identity-label">WHO ARE YOU BECOMING?</div><div class="identity-title">${safeIdentity}</div><div class="identity-quote">Every action today is another vote for your future self.</div></div>`; },
 
     actionRow(action) {
-        const { id, title, subtitle, completed, is_counter, description, habit_type, target, unit } = action;
+        const { id, title, subtitle, completed, is_counter, description, habit_type, target, unit, minimum, normal, stretch, cue, location } = action;
         const safeTitle = Helpers.escapeHtml(title || "");
         const safeSubtitle = Helpers.escapeHtml(subtitle || "");
         const safeDescription = Helpers.escapeHtml(description || "");
         const safeLessonTitle = Helpers.escapeHtml(action.lesson_title || "");
         const counterValue = Database.getCounterValue(id);
-
         let counterDisplay = "";
         if (is_counter) {
             const displayTarget = target ? ` / ${target} ${unit || ""}` : "";
             counterDisplay = `<div class="counter-display"><span class="counter-value">${counterValue}</span><span class="counter-target">${displayTarget}</span></div>`;
         }
-
-        return `
-        <div class="action-card ${completed ? "completed" : ""}">
-            <div class="action-content">
-                <h3>${safeTitle}</h3>
-                ${safeSubtitle ? `<p class="action-subtitle">${safeSubtitle}</p>` : ""}
-                ${safeDescription ? `<p class="action-description">${safeDescription}</p>` : ""}
-                ${safeLessonTitle ? `<small class="habit-source">Created from: ${safeLessonTitle}</small>` : ""}
-                ${counterDisplay}
-            </div>
-            <div class="action-controls">
-                <button class="edit-button" onclick="App.openSheet(${id})" aria-label="Edit habit">✏️</button>
-                ${is_counter ? `
-                <div class="counter-box">
-                    <button onclick="App.changeCounter(${id}, -1)" aria-label="Decrement">−</button>
-                    <input id="counter-${id}" type="number" value="${counterValue}" min="0" aria-label="Current count">
-                    <button onclick="App.changeCounter(${id}, 1)" aria-label="Increment">+</button>
-                    <button onclick="App.saveCounterFromInput(${id})">Save</button>
-                </div>
-                ` : `
-                <button class="vote-button ${completed ? "completed" : ""}" onclick="App.toggleAction(${id})" aria-label="${completed ? "Mark incomplete" : "Mark complete"}">${completed ? "✓" : "○"}</button>
-                `}
-            </div>
-        </div>
-        `;
+        let contextHtml = "";
+        if (cue || minimum || normal) {
+            contextHtml = `<div class="action-context">`;
+            if (cue) contextHtml += `<small>🪝 ${Helpers.escapeHtml(cue)}</small>`;
+            if (minimum) contextHtml += `<small>📉 Min: ${Helpers.escapeHtml(minimum)}</small>`;
+            if (normal) contextHtml += `<small>📊 Normal: ${Helpers.escapeHtml(normal)}</small>`;
+            if (stretch) contextHtml += `<small>🚀 Stretch: ${Helpers.escapeHtml(stretch)}</small>`;
+            contextHtml += `</div>`;
+        }
+        return `<div class="action-card ${completed ? "completed" : ""}"><div class="action-content"><h3>${safeTitle}</h3>${safeSubtitle ? `<p class="action-subtitle">${safeSubtitle}</p>` : ""}${safeDescription ? `<p class="action-description">${safeDescription}</p>` : ""}${safeLessonTitle ? `<small class="habit-source">Created from: ${safeLessonTitle}</small>` : ""}${contextHtml}${counterDisplay}</div><div class="action-controls"><button class="edit-button" onclick="App.openSheet(${id})" aria-label="Edit habit">✏️</button>${is_counter ? `<div class="counter-box"><button onclick="App.changeCounter(${id}, -1)" aria-label="Decrement">−</button><input id="counter-${id}" type="number" value="${counterValue}" min="0" aria-label="Current count"><button onclick="App.changeCounter(${id}, 1)" aria-label="Increment">+</button><button onclick="App.saveCounterFromInput(${id})">Save</button></div>` : `<button class="vote-button ${completed ? "completed" : ""}" onclick="App.toggleAction(${id})" aria-label="${completed ? "Mark incomplete" : "Mark complete"}">${completed ? "✓" : "○"}</button>`}</div></div>`;
     },
 
     bottomNav(active = "today") {
-        const items = [
-            { id: "today", icon: "🏠", label: "Today" },
-            { id: "learn", icon: "📚", label: "Learn" },
-            { id: "journal", icon: "📖", label: "Diary" },
-            { id: "identity", icon: "🌱", label: "Identity" },
-            { id: "calendar", icon: "📅", label: "Calendar" }
-        ];
+        const items = [{ id: "today", icon: "🏠", label: "Today" },{ id: "learn", icon: "📚", label: "Learn" },{ id: "journal", icon: "📖", label: "Diary" },{ id: "identity", icon: "🌱", label: "Identity" },{ id: "calendar", icon: "📅", label: "Calendar" }];
         return `<nav class="bottom-nav" role="navigation" aria-label="Main navigation">${items.map(item => `<button class="nav-item ${item.id === active ? "active" : ""}" onclick="App.navigate('${item.id}')" aria-current="${item.id === active ? "page" : "false"}"><span class="nav-icon">${item.icon}</span><span class="nav-label">${item.label}</span></button>`).join("")}</nav>`;
     },
 
@@ -70,136 +38,32 @@ const UI = {
     },
 
     addActionSheet() {
-        return `
-        <div id="actionSheet" class="bottom-sheet hidden" role="dialog" aria-labelledby="sheetTitle" aria-modal="true">
-            <div class="sheet-handle"></div>
-            <h2 id="sheetTitle">New Habit</h2>
-            <form id="habitForm" onsubmit="App.saveHabit(event)">
-                <div class="form-step" data-step="1">
-                    <h3>What's the habit?</h3>
-                    <div class="form-group">
-                        <label for="habitTitle">Habit name</label>
-                        <input type="text" id="habitTitle" placeholder="e.g., Walk after dinner" required maxlength="80">
-                    </div>
-                    <div class="form-group">
-                        <label for="habitWhy">Why does this matter?</label>
-                        <textarea id="habitWhy" placeholder="Connect to your identity..." rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Habit type</label>
-                        <div class="habit-type-selector">
-                            <button type="button" class="habit-type-btn active" data-type="binary" onclick="UI.selectHabitType('binary')">✓ Binary</button>
-                            <button type="button" class="habit-type-btn" data-type="count" onclick="UI.selectHabitType('count')">🔢 Count</button>
-                            <button type="button" class="habit-type-btn" data-type="duration" onclick="UI.selectHabitType('duration')">⏱ Duration</button>
-                        </div>
-                        <input type="hidden" id="habitType" name="habitType" value="binary">
-                    </div>
-                    <div id="counterFields" class="hidden">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="habitTarget">Target</label>
-                                <input type="number" id="habitTarget" name="target" min="1" value="1">
-                            </div>
-                            <div class="form-group">
-                                <label for="habitUnit">Unit</label>
-                                <input type="text" id="habitUnit" name="unit" placeholder="e.g., glasses, pages, minutes" value="times">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="sheet-actions">
-                        <button type="button" class="secondary-button" onclick="UI.closeSheet()">Cancel</button>
-                        <button type="button" class="primary-button" onclick="UI.nextHabitStep(2)">Next</button>
-                    </div>
-                </div>
-
-                <div class="form-step hidden" data-step="2">
-                    <h3>When & Where</h3>
-                    <div class="form-group">
-                        <label for="habitTime">Preferred time</label>
-                        <input type="time" id="habitTime" name="time">
-                    </div>
-                    <div class="form-group">
-                        <label for="habitDays">Days</label>
-                        <div class="day-selector">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d, i) => `<label class="day-btn"><input type="checkbox" name="days" value="${i}" checked> ${d}</label>`).join("")}</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="habitLocation">Location (optional)</label>
-                        <input type="text" id="habitLocation" name="location" placeholder="e.g., Living room, Park, Kitchen">
-                    </div>
-                    <div class="form-group">
-                        <label for="habitCue">Cue / Trigger</label>
-                        <input type="text" id="habitCue" name="cue" placeholder="After I... (habit stacking)\ "
-                    </div>
-                    <div class="sheet-actions">
-                        <button type="button" class="secondary-button" onclick="UI.prevHabitStep(1)">Back</button>
-                        <button type="button" class="primary-button" onclick="UI.nextHabitStep(3)">Next</button>
-                    </div>
-                </div>
-
-                <div class="form-step hidden" data-step="3">
-                    <h3>Make it Easy</h3>
-                    <div class="form-group">
-                        <label for="habitMinimum">Minimum version (2-min rule)</label>
-                        <input type="text" id="habitMinimum" name="minimum" placeholder="e.g., Put on walking shoes">
-                    </div>
-                    <div class="form-group">
-                        <label for="habitNormal">Normal version</label>
-                        <input type="text" id="habitNormal" name="normal" placeholder="e.g., Walk 10 minutes">
-                    </div>
-                    <div class="form-group">
-                        <label for="habitStretch">Stretch version (optional)</label>
-                        <input type="text" id="habitStretch" name="stretch" placeholder="e.g., Walk 30 minutes">
-                    </div>
-                    <div class="form-group">
-                        <label for="habitEnvironment">Environment prep</label>
-                        <textarea id="habitEnvironment" name="environment" placeholder="e.g., Lay out shoes by door night before" rows="2"></textarea>
-                    </div>
-                    <div class="sheet-actions">
-                        <button type="button" class="secondary-button" onclick="UI.prevHabitStep(2)">Back</button>
-                        <button type="submit" class="primary-button">Create Habit</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        `;
+        return `<div id="actionSheet" class="bottom-sheet hidden" role="dialog" aria-labelledby="sheetTitle" aria-modal="true"><div class="sheet-handle"></div><h2 id="sheetTitle">New Habit</h2><form id="habitForm" onsubmit="App.saveHabit(event)"><div class="form-step" data-step="1"><h3>What's the habit?</h3><div class="form-group"><label for="habitTitle">Habit name</label><input type="text" id="habitTitle" placeholder="e.g., Walk after dinner" required maxlength="80"></div><div class="form-group"><label for="habitWhy">Why does this matter?</label><textarea id="habitWhy" placeholder="Connect to your identity..." rows="2"></textarea></div><div class="form-group"><label>Habit type</label><div class="habit-type-selector"><button type="button" class="habit-type-btn active" data-type="binary" onclick="UI.selectHabitType('binary')">✓ Binary</button><button type="button" class="habit-type-btn" data-type="count" onclick="UI.selectHabitType('count')">🔢 Count</button><button type="button" class="habit-type-btn" data-type="duration" onclick="UI.selectHabitType('duration')">⏱ Duration</button><button type="button" class="habit-type-btn" data-type="quantity" onclick="UI.selectHabitType('quantity')">📦 Quantity</button></div><input type="hidden" id="habitType" name="habitType" value="binary"></div><div id="counterFields" class="hidden"><div class="form-row"><div class="form-group"><label for="habitTarget">Target</label><input type="number" id="habitTarget" name="target" min="1" value="1"></div><div class="form-group"><label for="habitUnit">Unit</label><input type="text" id="habitUnit" name="unit" placeholder="e.g., glasses, pages, minutes" value="times"></div></div></div><div class="sheet-actions"><button type="button" class="secondary-button" onclick="UI.closeSheet()">Cancel</button><button type="button" class="primary-button" onclick="UI.nextHabitStep(2)">Next</button></div></div><div class="form-step hidden" data-step="2"><h3>When & Where</h3><div class="form-group"><label for="habitTime">Preferred time</label><input type="time" id="habitTime" name="time"></div><div class="form-group"><label>Days</label><div class="day-selector">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d, i) => `<label class="day-btn"><input type="checkbox" name="days" value="${i}" ${i < 6 ? 'checked' : ''}> ${d}</label>`).join("")}</div></div><div class="form-group"><label for="habitLocation">Location (optional)</label><input type="text" id="habitLocation" name="location" placeholder="e.g., Living room, Park, Kitchen"></div><div class="form-group"><label for="habitCue">Cue / Trigger</label><input type="text" id="habitCue" name="cue" placeholder="After I... (habit stacking)"></div><div class="sheet-actions"><button type="button" class="secondary-button" onclick="UI.prevHabitStep(1)">Back</button><button type="button" class="primary-button" onclick="UI.nextHabitStep(3)">Next</button></div></div><div class="form-step hidden" data-step="3"><h3>Make it Easy</h3><div class="form-group"><label for="habitMinimum">Minimum version (2-min rule)</label><input type="text" id="habitMinimum" name="minimum" placeholder="e.g., Put on walking shoes"></div><div class="form-group"><label for="habitNormal">Normal version</label><input type="text" id="habitNormal" name="normal" placeholder="e.g., Walk 10 minutes"></div><div class="form-group"><label for="habitStretch">Stretch version (optional)</label><input type="text" id="habitStretch" name="stretch" placeholder="e.g., Walk 30 minutes"></div><div class="form-group"><label for="habitEnvironment">Environment prep</label><textarea id="habitEnvironment" name="environment" placeholder="e.g., Lay out shoes by door night before" rows="2"></textarea></div><div class="sheet-actions"><button type="button" class="secondary-button" onclick="UI.prevHabitStep(2)">Back</button><button type="submit" class="primary-button">Create Habit</button></div></div></form></div>`;
     },
 
     selectHabitType(type) {
         document.querySelectorAll('.habit-type-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`.habit-type-btn[data-type="${type}"]`)?.classList.add('active');
-        document.getElementById('habitType').value = type;
-        const counterFields = document.getElementById('counterFields');
-        if (counterFields) {
-            counterFields.classList.toggle('hidden', type === 'binary');
-        }
+        const btn = document.querySelector(`.habit-type-btn[data-type="${type}"]`);
+        if (btn) btn.classList.add('active');
+        const hidden = document.getElementById('counterFields');
+        if (hidden) hidden.classList.toggle('hidden', ['binary'].includes(type));
+        const typeInput = document.getElementById('habitType');
+        if (typeInput) typeInput.value = type;
     },
 
-    nextHabitStep(step) {
-        document.querySelectorAll('.form-step').forEach(s => s.classList.add('hidden'));
-        document.querySelector(`.form-step[data-step="${step}"]`)?.classList.remove('hidden');
-    },
-
-    prevHabitStep(step) {
-        this.nextHabitStep(step);
-    },
-
-    closeSheet() {
-        const sheet = document.getElementById('actionSheet');
-        if (sheet) sheet.classList.add('hidden');
-        State.ui.activeSheet = null;
-    },
+    nextHabitStep(step) { document.querySelectorAll('.form-step').forEach(s => s.classList.add('hidden')); const target = document.querySelector(`.form-step[data-step="${step}"]`); if (target) target.classList.remove('hidden'); },
+    prevHabitStep(step) { this.nextHabitStep(step); },
+    closeSheet() { const sheet = document.getElementById('actionSheet'); if (sheet) sheet.classList.add('hidden'); State.ui.activeSheet = null; },
 
     openSheet(actionId = null) {
         const sheet = document.getElementById('actionSheet');
         if (sheet) {
             sheet.classList.remove('hidden');
             State.ui.activeSheet = 'habit';
-            // Reset form
             document.getElementById('habitForm')?.reset();
             document.querySelectorAll('.form-step').forEach((s, i) => s.classList.toggle('hidden', i !== 0));
             UI.selectHabitType('binary');
             if (actionId) {
-                // Edit mode - populate form
                 const action = State.actions.find(a => a.id === actionId);
                 if (action) {
                     State.editingActionId = actionId;
@@ -210,9 +74,7 @@ const UI = {
                     if (action.target) document.getElementById('habitTarget').value = action.target;
                     if (action.unit) document.getElementById('habitUnit').value = action.unit;
                     if (action.time) document.getElementById('habitTime').value = action.time;
-                    if (action.days) {
-                        document.querySelectorAll('[name="days"]').forEach(cb => cb.checked = action.days.includes(parseInt(cb.value)));
-                    }
+                    if (action.days) document.querySelectorAll('[name="days"]').forEach(cb => cb.checked = action.days.includes(parseInt(cb.value)));
                     if (action.location) document.getElementById('habitLocation').value = action.location;
                     if (action.cue) document.getElementById('habitCue').value = action.cue;
                     if (action.minimum) document.getElementById('habitMinimum').value = action.minimum;
@@ -220,123 +82,74 @@ const UI = {
                     if (action.stretch) document.getElementById('habitStretch').value = action.stretch;
                     if (action.environment) document.getElementById('habitEnvironment').value = action.environment;
                 }
-            } else {
-                State.editingActionId = null;
-                document.getElementById('sheetTitle').textContent = 'New Habit';
-            }
+            } else { State.editingActionId = null; document.getElementById('sheetTitle').textContent = 'New Habit'; }
         }
+    },
+
+    /**
+     * Today page with execution context.
+     * Filters actions by schedule (days, paused, archived, start_date).
+     * Shows min/normal/stretch and cue for each habit.
+     */
+    todayPage() {
+        const today = Helpers.todayISO();
+        const activeActions = State.actions.filter(a => a.identity_id === State.currentIdentityId && !a.archived && !a.paused && App.isHabitDueToday(a));
+        const completedToday = State.history.filter(h => h.identity_id === State.currentIdentityId && h.date === today).length;
+        const overdueActions = State.actions.filter(a => App.wasHabitMissedYesterday(a) && !a.archived);
+        const recommendations = App.getRecommendations();
+
+        let recoveryHtml = "";
+        if (overdueActions.length > 0) {
+            recoveryHtml = `<div class="recovery-section"><div class="section-header"><h2>🪄 Recovery</h2></div><p class="recovery-intro">You missed some habits yesterday. Return with the minimum version:</p>${overdueActions.map(action => `<div class="recovery-card"><h3>${Helpers.escapeHtml(action.title)}</h3><p>Missed yesterday — return small</p>${action.minimum ? `<button class="primary-button" onclick="App.toggleAction(${action.id})">${Helpers.escapeHtml(action.minimum)}</button>` : `<button class="primary-button" onclick="App.toggleAction(${action.id})">Complete now</button>`}</div>`).join("")}</div>`;
+        }
+
+        let intelHtml = "";
+        if (recommendations.length > 0 && recommendations.length <= 3) {
+            intelHtml = `<div class="intelligence-section"><div class="section-header"><h2>💡 Suggestions</h2></div>${recommendations.slice(0, 3).map(r => `<div class="intel-card"><p>${Helpers.escapeHtml(r.message)}</p><small>${Helpers.escapeHtml(r.suggestedAction)}</small></div>`).join("")}</div>`;
+        }
+
+        return `<div class="container"><div class="hero"><p class="greeting">${Helpers.greeting()}</p><h1 class="headline">Who are you becoming today?</h1><p class="daily-quote">${Helpers.quote()}</p></div>${UI.identityCard(State.profile.identity)}<button class="secondary-button" onclick="App.changeIdentity()">Change Identity</button>${UI.progressRing(completedToday, activeActions.length)}<div class="section-header"><h2>Today's Actions</h2><span>${completedToday} / ${activeActions.length}</span></div>${recoveryHtml}${intelHtml}${activeActions.map(action => { const completed = State.history.some(h => h.action_id === action.id && h.identity_id === State.currentIdentityId && h.date === today); return UI.actionRow({ ...action, completed }); }).join("")}${activeActions.length === 0 ? '<div class="empty-state"><p>No actions scheduled for today. Add habits in the builder.</p></div>' : ''}${UI.button("+ New Action", "primary-button", "App.openSheet()")}${UI.addActionSheet()}</div>${UI.bottomNav("today")}`;
     },
 
     identityDashboard() {
         const identity = State.identities.find(i => i.id === State.currentIdentityId);
         if (!identity) return '<p>No identity selected</p>';
-
         const habits = State.actions.filter(a => a.identity_id === State.currentIdentityId);
         const totalHabits = habits.length;
         const activeHabits = habits.filter(a => !a.paused && !a.archived).length;
         const today = Helpers.todayISO();
         const completedToday = State.history.filter(h => h.identity_id === State.currentIdentityId && h.date === today).length;
-
-        // Calculate evidence
-        const evidence = habits.map(habit => {
-            const history = State.history.filter(h => h.action_id === habit.id);
-            const completions = history.length;
-            const last7 = history.filter(h => {
-                const d = Helpers.parseISODate(h.date);
-                const weekAgo = new Date();
-                weekAgo.setDate(weekAgo.getDate() - 7);
-                return d >= weekAgo;
-            }).length;
-            const streak = this.calculateStreak(habit.id);
-            return { habit, completions, last7, streak };
-        });
-
-        // Lessons applied
+        const evidence = habits.map(habit => { const history = State.history.filter(h => h.action_id === habit.id); const completions = history.length; const last7 = history.filter(h => { const d = Helpers.parseISODate(h.date); const weekAgo = Helpers.addDays(today, -7); return d >= weekAgo; }).length; const streak = UI.calculateStreak(habit.id); return { habit, completions, last7, streak }; });
         const lessonsApplied = State.lessonProgress.filter(p => p.identity_id === State.currentIdentityId).length;
-
-        return `
-        <div class="identity-dashboard">
-            <div class="identity-header">
-                <h2>${Helpers.escapeHtml(identity.name)}</h2>
-                <p class="identity-meta">Created ${Helpers.formatDate(new Date(identity.created_at), { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-            </div>
-
-            <div class="identity-stats">
-                <div class="stat-mini">
-                    <strong>${activeHabits}</strong><span>Active Habits</span>
-                </div>
-                <div class="stat-mini">
-                    <strong>${completedToday}</strong><span>Today's Votes</span>
-                </div>
-                <div class="stat-mini">
-                    <strong>${evidence.reduce((sum, e) => sum + e.completions, 0)}</strong><span>Total Completions</span>
-                </div>
-                <div class="stat-mini">
-                    <strong>${lessonsApplied}</strong><span>Lessons Applied</span>
-                </div>
-            </div>
-
-            <div class="identity-sections">
-                <div class="identity-section">
-                    <h3>Habits Supporting This Identity</h3>
-                    ${habits.length === 0 ? '<p class="empty-state">No habits yet. Create your first habit to start building evidence.</p>' : ''}
-                    ${habits.map(habit => {
-                        const e = evidence.find(ev => ev.habit.id === habit.id);
-                        const health = this.calculateHabitHealth(habit, e);
-                        return `<div class="identity-habit-row">
-                            <div class="habit-info">
-                                <strong>${Helpers.escapeHtml(habit.title)}</strong>
-                                <span class="habit-health ${health.class}">${health.label}</span>
-                            </div>
-                            <div class="habit-evidence">
-                                <span>${e?.completions || 0} completions</span>
-                                <span>${e?.streak || 0} day streak</span>
-                            </div>
-                        </div>`;
-                    }).join('')}
-                </div>
-
-                <div class="identity-section">
-                    <h3>Recent Evidence</h3>
-                    ${this.recentEvidence()}
-                </div>
-
-                <div class="identity-section">
-                    <h3>Lessons Applied</h3>
-                    ${this.appliedLessons()}
-                </div>
-            </div>
-
-            <button class="primary-button" onclick="App.openSheet()" style="margin-top: 16px; width: 100%;">+ Add Habit to This Identity</button>
-        </div>
-        `;
+        return `<div class="identity-dashboard"><div class="identity-header"><h2>${Helpers.escapeHtml(identity.name)}</h2><p class="identity-meta">Created ${Helpers.formatDate(new Date(identity.created_at), { month: 'long', day: 'numeric', year: 'numeric' })}</p></div><div class="identity-stats"><div class="stat-mini"><strong>${activeHabits}</strong><span>Active Habits</span></div><div class="stat-mini"><strong>${completedToday}</strong><span>Today's Votes</span></div><div class="stat-mini"><strong>${evidence.reduce((sum, e) => sum + e.completions, 0)}</strong><span>Total Completions</span></div><div class="stat-mini"><strong>${lessonsApplied}</strong><span>Lessons Applied</span></div></div><div class="identity-sections"><div class="identity-section"><h3>Habits & Evidence</h3>${evidence.map(e => `<div class="evidence-row"><span class="evidence-habit">${Helpers.escapeHtml(e.habit.title)}</span><span class="evidence-streak">${e.streak} day streak</span><span class="evidence-count">${e.completions} total</span></div>`).join("")}</div><div class="identity-section"><h3>Identity Evidence</h3><p>Every completion adds a piece of evidence to who you are becoming.</p></div><div class="identity-section"><h3>Lessons Applied</h3>${UI.appliedLessons()}</div></div><button class="primary-button" onclick="App.openSheet()" style="margin-top: 16px; width: 100%;">+ Add Habit to This Identity</button></div>`;
     },
 
+    /**
+     * Deterministic streak calculation using timezone-safe date arithmetic.
+     */
     calculateStreak(actionId) {
         const history = State.history.filter(h => h.action_id === actionId).sort((a, b) => b.date.localeCompare(a.date));
         if (history.length === 0) return 0;
         let streak = 0;
         let currentDate = Helpers.todayISO();
         for (const record of history) {
-            if (record.date === currentDate || (streak === 0 && Helpers.isPast(record.date) && Helpers.isToday(Helpers.formatDate(new Date(record.date), {})))) {
+            if (record.date === currentDate || (streak === 0 && Helpers.isYesterday(record.date))) {
                 streak++;
-                const d = Helpers.parseISODate(currentDate);
-                d.setDate(d.getDate() - 1);
-                currentDate = Helpers.formatDate(d, { month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
-            } else {
-                break;
-            }
+                currentDate = Helpers.addDays(currentDate, -1);
+            } else { break; }
         }
         return streak;
     },
 
+    /**
+     * Deterministic habit health based on actual evidence.
+     */
     calculateHabitHealth(habit, evidence) {
         if (!evidence || evidence.completions === 0) return { class: 'new', label: 'New' };
-        const daysSinceStart = Math.max(1, Math.floor((new Date() - Helpers.parseISODate(habit.created_at || Helpers.todayISO())) / 86400000));
-        const expected = habit.frequency || 1; // per week
+        const daysSinceStart = Math.max(1, Math.floor((new Date(Helpers.todayISO() + "T00:00:00").getTime() - new Date((habit.created_at || Helpers.todayISO()) + "T00:00:00").getTime()) / 86400000));
+        const expected = habit.days && habit.days.length > 0 ? habit.days.length / 7 : 1;
         const completionRate = evidence.completions / Math.max(1, daysSinceStart / 7 * expected);
         const recentRate = evidence.last7 / Math.max(1, expected);
-
         if (daysSinceStart < 14) return { class: 'building', label: 'Building' };
         if (recentRate >= 0.8 && completionRate >= 0.7) return { class: 'stable', label: 'Stable' };
         if (recentRate >= 0.5) return { class: 'struggling', label: 'Struggling' };
@@ -345,56 +158,34 @@ const UI = {
 
     recentEvidence() {
         const today = Helpers.todayISO();
-        const recent = State.history
-            .filter(h => h.identity_id === State.currentIdentityId && h.date <= today)
-            .sort((a, b) => b.date.localeCompare(a.date))
-            .slice(0, 10);
+        const recent = State.history.filter(h => h.identity_id === State.currentIdentityId && h.date <= today).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
         if (recent.length === 0) return '<p class="empty-state">No completions yet. Your first action creates the first vote.</p>';
-        return recent.map(r => {
-            const action = State.actions.find(a => a.id === r.action_id);
-            return `<div class="evidence-row">
-                <span class="evidence-date">${Helpers.formatDate(Helpers.parseISODate(r.date), { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-                <span class="evidence-habit">${Helpers.escapeHtml(action?.title || 'Unknown')}</span>
-                ${r.value ? `<span class="evidence-value">${r.value}</span>` : ''}
-            </div>`;
-        }).join('');
+        return recent.map(r => { const action = State.actions.find(a => a.id === r.action_id); return `<div class="evidence-row"><span class="evidence-date">${Helpers.formatDate(Helpers.parseISODate(r.date), { weekday: 'short', month: 'short', day: 'numeric' })}</span><span class="evidence-habit">${Helpers.escapeHtml(action?.title || 'Unknown')}</span>${r.value ? `<span class="evidence-value">${r.value}</span>` : ''}</div>`; }).join('');
     },
 
     appliedLessons() {
-        const applied = State.lessonProgress
-            .filter(p => p.identity_id === State.currentIdentityId)
-            .map(p => Lessons.find(l => l.id === p.lesson_id))
-            .filter(Boolean);
-        if (applied.length === 0) return '<p class="empty-state">No lessons applied yet. Complete a lesson and create a habit from it.</p>';
+        const applied = State.lessonProgress.filter(p => p.identity_id === State.currentIdentityId).map(p => Lessons.find(l => l.id === p.lesson_id)).filter(Boolean);
+        if (applied.length === 0) return '<p class="empty-state">No lessons applied yet.</p>';
         return applied.map(l => `<div class="lesson-applied"><strong>${l.title}</strong><span>Module: ${l.module}</span></div>`).join('');
     },
 
     reflectionHistory() {
-        const reflections = State.reflections
-            .filter(r => r.identity_id === State.currentIdentityId)
-            .sort((a, b) => b.reflection_date.localeCompare(a.reflection_date))
-            .slice(0, 7);
-        return reflections.map(r => `<div class="reflection-history-item">
-            <div class="reflection-date">${Helpers.formatDate(Helpers.parseISODate(r.reflection_date), { weekday: 'short', month: 'short', day: 'numeric' })}</div>
-            <div class="reflection-win">${Helpers.escapeHtml(r.win || '')}</div>
-        </div>`).join('');
+        const reflections = State.reflections.filter(r => r.identity_id === State.currentIdentityId).sort((a, b) => b.reflection_date.localeCompare(a.reflection_date)).slice(0, 7);
+        return reflections.map(r => `<div class="reflection-history-item"><div class="reflection-date">${Helpers.formatDate(Helpers.parseISODate(r.reflection_date), { weekday: 'short', month: 'short', day: 'numeric' })}</div><div class="reflection-win">${Helpers.escapeHtml(r.win || '')}</div></div>`).join('');
     },
 
+    /**
+     * Stats with deterministic calculations.
+     */
     stats() {
         const today = Helpers.todayISO();
         const habits = State.actions.filter(a => a.identity_id === State.currentIdentityId);
         const totalHabits = habits.length;
         const completedToday = State.history.filter(h => h.identity_id === State.currentIdentityId && h.date === today).length;
         const totalCompletions = State.history.filter(h => h.identity_id === State.currentIdentityId).length;
-        const currentStreak = this.calculateOverallStreak();
-        const bestStreak = this.calculateBestStreak();
-
-        return `<div class="stats-grid">
-            <div class="stat-card"><h3>Today</h3><strong>${completedToday}/${totalHabits}</strong></div>
-            <div class="stat-card"><h3>Current Streak</h3><strong>${currentStreak}</strong><span>days</span></div>
-            <div class="stat-card"><h3>Best Streak</h3><strong>${bestStreak}</strong><span>days</span></div>
-            <div class="stat-card"><h3>Total Votes</h3><strong>${totalCompletions}</strong></div>
-        </div>`;
+        const currentStreak = UI.calculateOverallStreak();
+        const bestStreak = UI.calculateBestStreak();
+        return `<div class="stats-grid"><div class="stat-card"><h3>Today</h3><strong>${completedToday}/${totalHabits}</strong></div><div class="stat-card"><h3>Current Streak</h3><strong>${currentStreak}</strong><span>days</span></div><div class="stat-card"><h3>Best Streak</h3><strong>${bestStreak}</strong><span>days</span></div><div class="stat-card"><h3>Total Votes</h3><strong>${totalCompletions}</strong></div></div>`;
     },
 
     calculateOverallStreak() {
@@ -403,14 +194,8 @@ const UI = {
         let streak = 0;
         let checkDate = Helpers.todayISO();
         for (const date of dates.reverse()) {
-            if (date === checkDate) {
-                streak++;
-                const d = Helpers.parseISODate(checkDate);
-                d.setDate(d.getDate() - 1);
-                checkDate = Helpers.formatDate(d, { month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
-            } else if (date < checkDate) {
-                break;
-            }
+            if (date === checkDate) { streak++; checkDate = Helpers.addDays(checkDate, -1); }
+            else if (date < checkDate) { break; }
         }
         return streak;
     },
@@ -423,13 +208,9 @@ const UI = {
         for (let i = 1; i < dates.length; i++) {
             const prev = Helpers.parseISODate(dates[i-1]);
             const curr = Helpers.parseISODate(dates[i]);
-            const diff = Math.round((curr - prev) / 86400000);
-            if (diff === 1) {
-                current++;
-                best = Math.max(best, current);
-            } else {
-                current = 1;
-            }
+            const diff = Math.round((curr.getTime() - prev.getTime()) / 86400000);
+            if (diff === 1) { current++; best = Math.max(best, current); }
+            else { current = 1; }
         }
         return best;
     },
@@ -443,204 +224,80 @@ const UI = {
     },
 
     renderCalendar(year, month) {
+        const tz = State.userTimezone || 'UTC';
         const firstDay = new Date(year, month - 1, 1);
         const lastDay = new Date(year, month, 0);
-        const startDay = firstDay.getDay(); // 0 = Sunday
+        const startDay = new Intl.DateTimeFormat('en-CA', { timeZone: tz, weekday: 'numeric' }).format(firstDay) - 1;
         const daysInMonth = lastDay.getDate();
         const today = Helpers.todayISO();
-
         const completionsByDate = {};
-        State.history.filter(h => h.identity_id === State.currentIdentityId).forEach(h => {
-            if (!completionsByDate[h.date]) completionsByDate[h.date] = 0;
-            completionsByDate[h.date]++;
-        });
-
-        let html = `<div class="calendar-header"><button onclick="UI.renderCalendar(${year}, ${month - 1})" aria-label="Previous month">‹</button><h3>${new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(firstDay)}</h3><button onclick="UI.renderCalendar(${year}, ${month + 1})" aria-label="Next month">›</button></div><table class="calendar" role="grid" aria-label="${new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(firstDay)}"><thead><tr>${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<th scope="col">${d}</th>`).join('')}</tr></thead><tbody><tr>`;
-
-        // Empty cells before first day
+        State.history.filter(h => h.identity_id === State.currentIdentityId).forEach(h => { if (!completionsByDate[h.date]) completionsByDate[h.date] = 0; completionsByDate[h.date]++; });
+        let html = `<div class="calendar-header"><button onclick="UI.renderCalendar(${year}, ${month - 1})" aria-label="Previous month">‹</button><h3>${new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(firstDay)}</h3><button onclick="UI.renderCalendar(${year}, ${month + 1})" aria-label="Next month">›</button></div><table class="calendar" role="grid"><thead><tr>${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<th scope="col">${d}</th>`).join('')}</tr></thead><tbody><tr>`;
         for (let i = 0; i < startDay; i++) html += '<td class="empty"></td>';
-
         for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const count = completionsByDate[dateStr] || 0;
             const isToday = dateStr === today;
             const isPast = dateStr < today;
-            html += `<td class="${isToday ? "today" : ""} ${isPast ? "past" : ""} ${count > 0 ? "has-completion" : ""}" data-date="${dateStr}" onclick="App.openDayModal('${dateStr}')" role="gridcell" aria-label="${new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(year, month-1, day))}${count > 0 ? `, ${count} completions` : ''}"><span class="day-number">${day}</span>${count > 0 ? `<span class="completion-count">${count}</span>` : ''}</td>`;
+            html += `<td class="${isToday ? "today" : ""} ${isPast ? "past" : ""} ${count > 0 ? "has-completion" : ""}" data-date="${dateStr}" onclick="App.openDayModal('${dateStr}')"><span class="day-number">${day}</span>${count > 0 ? `<span class="completion-count">${count}</span>` : ''}</td>`;
             if ((startDay + day) % 7 === 0 && day !== daysInMonth) html += '</tr><tr>';
         }
-
         html += '</tr></tbody></table>';
         return html;
     },
 
     historyTimeline() {
         const history = State.history.filter(h => h.identity_id === State.currentIdentityId).sort((a, b) => b.date.localeCompare(a.date));
-        if (history.length === 0) return '<p class="empty-state">No history yet. Complete your first habit to start building your timeline.</p>';
-
+        if (history.length === 0) return '<p class="empty-state">No history yet.</p>';
         const grouped = {};
-        history.forEach(h => {
-            if (!grouped[h.date]) grouped[h.date] = [];
-            grouped[h.date].push(h);
-        });
-
-        return Object.entries(grouped).slice(0, 30).map(([date, records]) => {
-            const actions = records.map(r => {
-                const action = State.actions.find(a => a.id === r.action_id);
-                return action ? (action.is_counter ? `🔢 ${Helpers.escapeHtml(action.title)}: ${r.value ?? 0}` : `✓ ${Helpers.escapeHtml(action.title)}`) : null;
-            }).filter(Boolean);
-            const reflection = State.reflections.find(r => r.reflection_date === date && r.identity_id === State.currentIdentityId);
-            return `<div class="timeline-day" onclick="App.openDayModal('${date}')">
-                <div class="timeline-date">${Helpers.formatDate(Helpers.parseISODate(date), { weekday: 'long', month: 'long', day: 'numeric' })}</div>
-                <div class="timeline-actions">${actions.map(a => `<div class="timeline-action">${a}</div>`).join('')}</div>
-                ${reflection ? `<div class="timeline-reflection">💭 ${Helpers.escapeHtml(r.win || '').substring(0, 60)}</div>` : ''}
-            </div>`;
-        }).join('');
+        history.forEach(h => { if (!grouped[h.date]) grouped[h.date] = []; grouped[h.date].push(h); });
+        return Object.entries(grouped).slice(0, 30).map(([date, records]) => { const actions = records.map(r => { const action = State.actions.find(a => a.id === r.action_id); return action ? (action.habit_type === 'count' || action.habit_type === 'duration' || action.habit_type === 'quantity' ? `🔢 ${Helpers.escapeHtml(action.title)}: ${r.value ?? 0}` : `✓ ${Helpers.escapeHtml(action.title)}`) : null; }).filter(Boolean); const reflection = State.reflections.find(r => r.reflection_date === date && r.identity_id === State.currentIdentityId); return `<div class="timeline-day" onclick="App.openDayModal('${date}')"><div class="timeline-date">${Helpers.formatDate(Helpers.parseISODate(date), { weekday: 'long', month: 'long', day: 'numeric' })}</div><div class="timeline-actions">${actions.map(a => `<div class="timeline-action">${a}</div>`).join('')}</div>${reflection ? `<div class="timeline-reflection">💭 ${Helpers.escapeHtml(reflection.win || '').substring(0, 60)}</div>` : ''}</div>`; }).join('');
     },
 
-    dayModal() {
-        return `<div id="dayModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayModalTitle"><div class="modal-card"><button class="modal-close" onclick="App.closeDayModal()" aria-label="Close">×</button><h2 id="dayModalTitle"></h2><div id="dayModalContent"></div></div></div>`;
+    /**
+     * Weekly review page with deterministic data.
+     */
+    weeklyReview() {
+        const review = App.getWeeklyReview();
+        if (!review.hasData) { return `<div class="container"><div class="hero"><h1 class="headline">Weekly Review</h1></div><div class="empty-state"><p>Not enough data yet. Complete at least a few habits to generate a weekly review.</p></div></div>`; }
+        return `<div class="container"><div class="hero"><h1 class="headline">Weekly Review</h1><p class="daily-quote">Week of ${Helpers.formatDate(Helpers.parseISODate(review.weekStart), { month: 'long', day: 'numeric' })} – ${Helpers.formatDate(Helpers.parseISODate(review.weekEnd), { month: 'long', day: 'numeric' })}</p></div><div class="stats-grid"><div class="stat-card"><h3>Habits Done</h3><strong>${review.completedHabits}/${review.totalHabits}</strong></div><div class="stat-card"><h3>Completions</h3><strong>${review.totalCompletions}</strong></div><div class="stat-card"><h3>Missed</h3><strong>${review.missed}</strong></div><div class="stat-card"><h3>Reflections</h3><strong>${review.reflections}</strong></div></div><div class="identity-sections"><div class="identity-section"><h3>🏆 Strongest Habit</h3>${review.strongest ? `<p>${Helpers.escapeHtml(review.strongest)} (${Math.round(review.strongestRate * 100)}% consistency)</p>` : '<p>No strong data yet.</p>'}</div><div class="identity-section"><h3>⚠️ Struggling Habit</h3>${review.struggling ? `<p>${Helpers.escapeHtml(review.struggling)} (${Math.round(review.strugglingRate * 100)}% consistency)</p><small>Consider reducing the normal target or changing the cue.</small>` : '<p>No struggling habits detected.</p>'}</div><div class="identity-section"><h3>📝 What Worked?</h3><textarea id="reviewWhatWorked" placeholder="What went well this week?"></textarea></div><div class="identity-section"><h3>🧱 What Got in the Way?</h3><textarea id="reviewObstacles" placeholder="What obstacles did you face?"></textarea></div><div class="identity-section"><h3>🔧 What Should I Change Next Week?</h3><textarea id="reviewChanges" placeholder="Your plan for next week..."></textarea></div><div class="sheet-actions" style="margin-top: 16px;"><button class="primary-button" onclick="UI.saveReview()">Save Review</button></div></div></div>`;
     },
 
-    onboarding() {
-        return `
-        <div class="container onboarding">
-            <div class="hero">
-                <h1 class="headline">Welcome to Identity OS</h1>
-                <p class="daily-quote">Who do you want to become?</p>
-            </div>
-
-            <div class="identity-list" id="identityList">
-                ${State.identities.map(id => `
-                <div class="identity-option" onclick="App.selectIdentity('${id.id}')">
-                    <div>${Helpers.escapeHtml(id.name)}</div>
-                    <button class="secondary-button" onclick="event.stopPropagation(); App.editIdentity('${id.id}')">Edit</button>
-                </div>
-                `).join('')}
-                <div class="identity-option add" onclick="App.createIdentity()">
-                    <span>+ Create Identity</span>
-                </div>
-            </div>
-        </div>
-        `;
+    async saveReview() {
+        const whatWorked = document.getElementById('reviewWhatWorked')?.value || '';
+        const obstacles = document.getElementById('reviewObstacles')?.value || '';
+        const changes = document.getElementById('reviewChanges')?.value || '';
+        const today = Helpers.todayISO();
+        const reviewData = { week_start: Helpers.addDays(today, -7), summary: { whatWorked, obstacles, changes }, adjustments: '' };
+        const { data, error } = await supabaseClient.from("weekly_reviews").insert({ profile_id: State.profile.id, identity_id: State.currentIdentityId, week_start: reviewData.week_start, summary: reviewData.summary }).select().single();
+        if (error) { console.error(error); UI.showToast("Failed to save review"); }
+        else { UI.showToast("Review saved"); App.navigate("today"); }
     },
 
     loginPage() {
-        return `
-        <div class="login-page">
-            <img class="login-logo" src="assets/icons/icon-192.png" alt="Logo">
-            <h1>Identity OS</h1>
-            <p class="login-subtitle">Build your identity one day at a time.</p>
-            <input id="loginEmail" type="email" placeholder="Email">
-            <input id="loginPassword" type="password" placeholder="Password">
-            <button class="primary-button" onclick="UI.login()">Login</button>
-            <button class="secondary-button" onclick="UI.openSignup()">Create Account</button>
-            <button class="google-btn" onclick="loginWithGoogle()">Continue with <span class="google-brand">Google</span></button>
-            ${this.signupSheet()}
-        </div>
-        `;
+        return `<div class="login-page"><h1>Identity OS</h1><input id="loginEmail" type="email" placeholder="Email" aria-label="Email"><input id="loginPassword" type="password" placeholder="Password" aria-label="Password"><button class="primary-button" onclick="UI.login()">Sign In</button><button class="google-btn" onclick="UI.loginWithGoogle()"><span>🔵</span><span>Sign in with Google</span></button><p style="margin-top:16px;text-align:center;"><a href="#" onclick="event.preventDefault(); UI.showSignup();">Create an account</a></p></div>`;
     },
 
-    openSignup() {
-        const sheet = document.getElementById("signupSheet");
-        if (!sheet) return;
-        sheet.classList.remove("hidden");
-        setTimeout(() => sheet.classList.add("show"), 10);
+    onboarding() {
+        const identities = State.identities.map(i => `<div class="identity-option"><div>${Helpers.escapeHtml(i.name)}</div><button onclick="App.selectIdentity(${i.id})" aria-label="Select ${Helpers.escapeHtml(i.name)}">✓</button></div>`).join("");
+        return `<div class="login-page"><h1>Identity OS</h1><div class="identity-list">${identities}${State.identities.length === 0 ? '' : ''}<div class="identity-option" style="cursor:pointer;" onclick="App.createIdentity()"><div>+ Add Identity</div></div></div></div>`;
     },
 
-    closeSignup() {
-        const sheet = document.getElementById("signupSheet");
-        if (!sheet) return;
-        sheet.classList.remove("show");
-        setTimeout(() => sheet.classList.add("hidden"), 250);
+    lessonDetail(id) {
+        const lesson = Lessons.find(l => l.id === id);
+        if (!lesson) return '<div class="container"><p>Lesson not found.</p></div>';
+        const completed = State.completedLessons.includes(id);
+        const alreadyCreated = State.actions.some(a => a.lesson_id === id);
+        const dd = lesson.designDefaults || {};
+        return `<div class="container"><div class="hero"><h1 class="headline">${Helpers.escapeHtml(lesson.title)}</h1><p class="daily-quote">${Helpers.escapeHtml(lesson.principle)}</p></div><div class="stat-card"><h3>Challenge</h3><p>${Helpers.escapeHtml(lesson.action)}</p></div>${dd.minimum || dd.normal || dd.stretch ? `<div class="stat-card"><h3>Suggested Design</h3><p>Minimum: ${Helpers.escapeHtml(dd.minimum || 'N/A')}</p><p>Normal: ${Helpers.escapeHtml(dd.normal || 'N/A')}</p>${dd.stretch ? `<p>Stretch: ${Helpers.escapeHtml(dd.stretch)}</p>` : ''}</div>` : ''}<div class="sheet-actions"><button class="primary-button" onclick="App.createHabitFromLesson(${id})">${alreadyCreated ? 'Habit Already Created' : 'Create Habit from This Lesson'}</button><button class="secondary-button" onclick="App.navigate('learn')">Back to Lessons</button></div></div>`;
     },
 
-    async login() {
-        const email = document.getElementById("loginEmail").value.trim();
-        const password = document.getElementById("loginPassword").value.trim();
-
-        if (!email || !password) {
-            UI.showToast("Enter email and password.");
-            return;
-        }
-
-        const result = await window.login(email, password);
-
-        if (result.error) {
-            UI.showToast(result.error);
-            return;
-        }
-
-        location.reload();
-    },
-
-    async signup() {
-        const email = document.getElementById("signupEmail").value.trim();
-        const password = document.getElementById("signupPassword").value.trim();
-        const confirm = document.getElementById("signupConfirm").value.trim();
-
-        if (!email) {
-            UI.showToast("Enter your email.");
-            return;
-        }
-
-        if (!password) {
-            UI.showToast("Enter your password.");
-            return;
-        }
-
-        if (password !== confirm) {
-            UI.showToast("Passwords do not match.");
-            return;
-        }
-
-        const result = await createAccount(email, password);
-
-        if (result.error) {
-            UI.showToast(result.error);
-            return;
-        }
-
-        UI.showToast("Account created. Check your email.");
-        this.closeSignup();
-    },
-
-    signupSheet() {
-        return `
-        <div id="signupSheet" class="bottom-sheet hidden">
-            <div class="sheet-handle"></div>
-            <h2>Create Account</h2>
-            <input id="signupEmail" type="email" placeholder="Email">
-            <input id="signupPassword" type="password" placeholder="Password">
-            <input id="signupConfirm" type="password" placeholder="Confirm Password">
-            <div class="sheet-actions">
-                <button class="primary-button" onclick="UI.signup()">Create Account</button>
-                <button class="secondary-button" onclick="UI.closeSignup()">Cancel</button>
-            </div>
-        </div>
-        `;
-    },
-
-    showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'polite');
-        document.body.appendChild(toast);
-        requestAnimationFrame(() => toast.classList.add('show'));
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    },
-
-    showUpdateBanner(worker) {
-        const banner = document.createElement('div');
-        banner.className = 'update-banner';
-        banner.innerHTML = `<span>Update available</span><button onclick="worker.postMessage({type:'SKIP_WAITING'}); this.parentElement.remove()">Refresh</button>`;
-        document.body.appendChild(banner);
-    }
-
+    showSignup() { const sheet = document.getElementById('signupSheet'); if (sheet) { sheet.classList.remove('hidden'); setTimeout(() => sheet.classList.add('show'), 10); } },
+    closeSignup() { const sheet = document.getElementById('signupSheet'); if (sheet) { sheet.classList.remove('show'); setTimeout(() => sheet.classList.add('hidden'), 250); } },
+    async login() { const email = document.getElementById('loginEmail')?.value.trim(); const password = document.getElementById('loginPassword')?.value.trim(); if (!email || !password) { UI.showToast('Enter email and password.'); return; } const result = await window.login(email, password); if (result.error) { UI.showToast(result.error); return; } location.reload(); },
+    async signup() { const email = document.getElementById('signupEmail')?.value.trim(); const password = document.getElementById('signupPassword')?.value.trim(); const confirm = document.getElementById('signupConfirm')?.value.trim(); if (!email) { UI.showToast('Enter your email.'); return; } if (!password) { UI.showToast('Enter your password.'); return; } if (password !== confirm) { UI.showToast('Passwords do not match.'); return; } const result = await createAccount(email, password); if (result.error) { UI.showToast(result.error); return; } UI.showToast('Account created. Check your email.'); this.closeSignup(); },
+    signupSheet() { return `<div id="signupSheet" class="bottom-sheet hidden"><div class="sheet-handle"></div><h2>Create Account</h2><input id="signupEmail" type="email" placeholder="Email"><input id="signupPassword" type="password" placeholder="Password"><input id="signupConfirm" type="password" placeholder="Confirm Password"><div class="sheet-actions"><button class="primary-button" onclick="UI.signup()">Create Account</button><button class="secondary-button" onclick="UI.closeSignup()">Cancel</button></div></div>`; },
+    showToast(message) { const toast = document.createElement('div'); toast.className = 'toast'; toast.textContent = message; toast.setAttribute('role', 'alert'); toast.setAttribute('aria-live', 'polite'); document.body.appendChild(toast); requestAnimationFrame(() => toast.classList.add('show')); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000); },
+    showUpdateBanner(worker) { const banner = document.createElement('div'); banner.className = 'update-banner'; banner.innerHTML = `<span>Update available</span><button onclick="worker.postMessage({type:'SKIP_WAITING'}); this.parentElement.remove()">Refresh</button>`; document.body.appendChild(banner); }
 };
-
 window.UI = UI;

@@ -1,183 +1,23 @@
 const Lessons = [
-
-{
-id:1,
-module:"Identity",
-type:"identity",
-title:"Identity Based Habits",
-principle:"Every action is a vote for the person you want to become. The goal is not just to build a habit, but to become the type of person who naturally performs that habit.",
-action:"Who do you want to become? Write your identity statement: I am the type of person who ______."
-},
-
-{
-id:2,
-module:"Identity",
-type:"reflection",
-title:"The Habit Loop",
-principle:"Every habit follows a pattern: Cue → Craving → Response → Reward. Understanding the loop helps you redesign your behavior.",
-action:"Choose one habit you want to change and identify its trigger, behavior, and reward."
-},
-
-{
-id:3,
-module:"Identity",
-type:"habit",
-title:"Goals vs Systems",
-principle:"Goals are the results you want. Systems are the daily actions that create those results.",
-action:"Take one goal and turn it into a repeatable daily system."
-},
-
-{
-id:4,
-module:"Make It Obvious",
-type:"reflection",
-title:"Habit Scorecard",
-principle:"You cannot change habits you do not notice. Awareness comes before transformation.",
-action:"List your daily habits and mark which ones support your future identity."
-},
-
-{
-id:5,
-module:"Make It Obvious",
-type:"habit",
-title:"Implementation Intentions",
-principle:"A clear plan removes uncertainty. Decide when and where your habit will happen.",
-action:"Complete this sentence: I will ______ at ______ in ______."
-},
-
-{
-id:6,
-module:"Make It Obvious",
-type:"habit",
-title:"Habit Stacking",
-principle:"Use an existing habit as a trigger for a new behavior.",
-action:"Create a stack: After I ______, I will ______."
-},
-
-{
-id:7,
-module:"Make It Obvious",
-type:"challenge",
-title:"Environment Design",
-principle:"Your environment is stronger than motivation. Design your surroundings to make good habits easier.",
-action:"Change one thing in your environment to support your habit."
-},
-
-{
-id:8,
-module:"Make It Attractive",
-type:"challenge",
-title:"Temptation Bundling",
-principle:"Combine something you need to do with something you enjoy doing.",
-action:"Pair a difficult habit with something enjoyable."
-},
-
-{
-id:9,
-module:"Make It Attractive",
-type:"reflection",
-title:"The Influence of Community",
-principle:"We naturally copy the habits of people around us. Your environment includes the people you spend time with.",
-action:"Identify a community or person who represents the identity you want."
-},
-
-{
-id:10,
-module:"Make It Attractive",
-type:"challenge",
-title:"Create Motivation",
-principle:"The anticipation of a reward makes habits easier to start.",
-action:"Find a way to make your habit more enjoyable."
-},
-
-{
-id:11,
-module:"Make It Easy",
-type:"habit",
-title:"The Two Minute Rule",
-principle:"Every habit should begin with a version that takes less than two minutes.",
-action:"Shrink one habit into the smallest possible starting action."
-},
-
-{
-id:12,
-module:"Make It Easy",
-type:"challenge",
-title:"Reduce Friction",
-principle:"Make good habits easier and bad habits harder by changing the environment.",
-action:"Remove one obstacle that prevents your habit."
-},
-
-{
-id:13,
-module:"Make It Easy",
-type:"habit",
-title:"Automation",
-principle:"The best way to improve consistency is to remove repeated decisions.",
-action:"Choose one behavior you can automate or schedule."
-},
-
-{
-id:14,
-module:"Make It Easy",
-type:"challenge",
-title:"Master Repetition",
-principle:"Habits are built through repetition, not perfection.",
-action:"Focus on showing up consistently before increasing difficulty."
-},
-
-{
-id:15,
-module:"Make It Satisfying",
-type:"challenge",
-title:"Immediate Rewards",
-principle:"Your brain repeats behaviors that feel rewarding.",
-action:"Create a small reward after completing your habit."
-},
-
-{
-id:16,
-module:"Make It Satisfying",
-type:"habit",
-title:"Habit Tracking",
-principle:"Tracking keeps you aware and creates momentum.",
-action:"Use your calendar and history to visualize consistency."
-},
-
-{
-id:17,
-module:"Make It Satisfying",
-type:"reflection",
-title:"Never Miss Twice",
-principle:"Missing once is normal. The recovery is what protects your identity.",
-action:"Create a plan for how you will recover after missing a habit."
-},
-
-{
-id:18,
-module:"Mastery",
-type:"reflection",
-title:"The Plateau of Latent Potential",
-principle:"Results often appear after a long period of invisible progress.",
-action:"Commit to the process even when results are not immediate."
-},
-
-{
-id:19,
-module:"Mastery",
-type:"challenge",
-title:"The Goldilocks Rule",
-principle:"Growth happens when challenges are slightly above your current ability.",
-action:"Adjust your habit so it challenges you without overwhelming you."
-},
-
-{
-id:20,
-module:"Mastery",
-type:"reflection",
-title:"Continuous Improvement",
-principle:"Small improvements repeated over time create mastery.",
-action:"Choose one system you can improve by 1% today."
-}
-
+    { id:1, module:"Identity", type:"identity", title:"Identity Based Habits", principle:"Every action is a vote for the person you want to become.", action:"Who do you want to become? Write your identity statement: I am the type of person who ______.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"1 minute of reflection", normal:"5 minutes of reflection", stretch:"15 minutes of reflection"} },
+    { id:2, module:"Identity", type:"reflection", title:"The Habit Loop", principle:"Every habit follows a pattern: Cue → Craving → Response → Reward.", action:"Choose one habit you want to change and identify its trigger, behavior, and reward.", designDefaults:{cue:"After [existing routine]", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Observe the loop once", normal:"Track the loop for 3 days", stretch:"Redesign one element of the loop"} },
+    { id:3, module:"Identity", type:"habit", title:"Goals vs Systems", principle:"Goals are the results you want. Systems are the daily actions that create those results.", action:"Take one goal and turn it into a repeatable daily system.", designDefaults:{cue:"After [current habit]", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"1 step toward the goal", normal:"Full system step", stretch:"Extra system step"} },
+    { id:4, module:"Make It Obvious", type:"reflection", title:"Habit Scorecard", principle:"You cannot change habits you do not notice. Awareness comes before transformation.", action:"List your daily habits and mark which ones support your future identity.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Write 3 habits", normal:"Write 5 habits with identity links", stretch:"Write 10 habits with full scorecard"} },
+    { id:5, module:"Make It Obvious", type:"habit", title:"Implementation Intentions", principle:"A clear plan removes uncertainty. Decide when and where your habit will happen.", action:"Complete this sentence: I will ______ at ______ in ______.", designDefaults:{cue:"After [time/location]", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Write the implementation intention", normal:"Set the time and location", stretch:"Add environment design"} },
+    { id:6, module:"Make It Obvious", type:"habit", title:"Habit Stacking", principle:"Use an existing habit as a trigger for a new behavior.", action:"Create a stack: After I ______, I will ______.", designDefaults:{cue:"After [existing routine]", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Identify one stack point", normal:"Create full stack statement", stretch:"Build 3 habit stacks"} },
+    { id:7, module:"Make It Obvious", type:"challenge", title:"Environment Design", principle:"Your environment is stronger than motivation. Design your surroundings to make good habits easier.", action:"Change one thing in your environment to support your habit.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Move one item", normal:"Prepare environment for 2 steps", stretch:"Design full environment"} },
+    { id:8, module:"Make It Attractive", type:"challenge", title:"Temptation Bundling", principle:"Combine something you need to do with something you enjoy doing.", action:"Pair a difficult habit with something enjoyable.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Identify the bundle", normal:"Pair habit with one reward", stretch:"Create a full temptation bundle"} },
+    { id:9, module:"Make It Attractive", type:"reflection", title:"The Influence of Community", principle:"We naturally copy the habits of people around us.", action:"Identify a community or person who represents the identity you want.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Name one person", normal:"Identify your community", stretch:"Set up one accountability connection"} },
+    { id:10, module:"Make It Attractive", type:"challenge", title:"Create Motivation", principle:"The anticipation of a reward makes habits easier to start.", action:"Find a way to make your habit more enjoyable.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Identify one motivation", normal:"Add a meaningful reward", stretch:"Create a celebration ritual"} },
+    { id:11, module:"Make It Easy", type:"habit", title:"The Two Minute Rule", principle:"Every habit should begin with a version that takes less than two minutes.", action:"Shrink one habit into the smallest possible starting action.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"2-minute version", normal:"10-minute version", stretch:"20-minute version"} },
+    { id:12, module:"Make It Easy", type:"challenge", title:"Reduce Friction", principle:"Make good habits easier and bad habits harder by changing the environment.", action:"Remove one obstacle that prevents your habit.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Remove one friction point", normal:"Prepare full environment", stretch:"Automate or eliminate friction"} },
+    { id:13, module:"Make It Easy", type:"habit", title:"Automation", principle:"The best way to improve consistency is to remove repeated decisions.", action:"Choose one behavior you can automate or schedule.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Set one trigger", normal:"Automate the trigger", stretch:"Full automation stack"} },
+    { id:14, module:"Make It Easy", type:"challenge", title:"Master Repetition", principle:"Habits are built through repetition, not perfection.", action:"Focus on showing up consistently before increasing difficulty.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Show up once", normal:"Show up daily for a week", stretch:"Show up daily for a month"} },
+    { id:15, module:"Make It Satisfying", type:"challenge", title:"Immediate Rewards", principle:"Your brain repeats behaviors that feel rewarding.", action:"Create a small reward after completing your habit.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"One small reward", normal:"Meaningful immediate reward", stretch:"Full reward celebration"} },
+    { id:16, module:"Make It Satisfying", type:"habit", title:"Habit Tracking", principle:"Tracking keeps you aware and creates momentum.", action:"Use your calendar and history to visualize consistency.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Mark one day", normal:"Track every day", stretch:"Review weekly patterns"} },
+    { id:17, module:"Make It Satisfying", type:"reflection", title:"Never Miss Twice", principle:"Missing once is normal. The recovery is what protects your identity.", action:"Create a plan for how you will recover after missing a habit.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Write recovery plan", normal:"Set minimum version for recovery", stretch:"Build full recovery system"} },
+    { id:18, module:"Mastery", type:"reflection", title:"The Plateau of Latent Potential", principle:"Results often appear after a long period of invisible progress.", action:"Commit to the process even when results are not immediate.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Acknowledge invisible progress", normal:"Continue despite plateau", stretch:"Document breakthrough moments"} },
+    { id:19, module:"Mastery", type:"challenge", title:"The Goldilocks Rule", principle:"Growth happens when challenges are slightly above your current ability.", action:"Adjust your habit so it challenges you without overwhelming you.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"Reduce to manageable level", normal:"Find the sweet spot", stretch:"Slightly stretch the challenge"} },
+    { id:20, module:"Mastery", type:"reflection", title:"Continuous Improvement", principle:"Small improvements repeated over time create mastery.", action:"Choose one system you can improve by 1% today.", designDefaults:{cue:"", location:"", environment:"", time:"", days:[0,1,2,3,4,5,6], minimum:"One 1% improvement", normal:"Full system review", stretch:"Multi-system optimization"} }
 ];
+window.Lessons = Lessons;
