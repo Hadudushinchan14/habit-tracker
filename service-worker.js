@@ -1,4 +1,4 @@
-const CACHE_NAME = "identity-os-v3.2";
+const CACHE_NAME = "become-v3.3";
 const FILES = ["./", "./index.html", "./manifest.json", "./css/theme.css", "./css/layout.css", "./css/components.css", "./css/pages.css", "./js/supabase.js", "./js/state.js", "./js/database.js", "./js/ui.js", "./js/pages.js", "./js/app.js", "./js/lessons.js", "/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", event => {

@@ -119,7 +119,7 @@ const Database = {
                 return;
             }
 
-            console.log("LESSON PROGRESS:", data);
+
             State.lessonProgress = data || [];
             State.errors.lessonProgress = null;
         } finally {

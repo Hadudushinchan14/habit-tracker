@@ -57,7 +57,7 @@ async function login(email, password) {
 async function createAccount(email, password) {
     const { data, error } = await supabaseClient.auth.signUp({ email, password });
     if (error) { console.error("SIGNUP ERROR:", error); return { error: error.message }; }
-    console.log("SIGNUP SUCCESS:", data);
+
     return { user: data.user };
 }
 

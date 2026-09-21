@@ -28,7 +28,7 @@ const UI = {
     },
 
     bottomNav(active = "today") {
-        const items = [{ id: "today", icon: "🏠", label: "Today" },{ id: "learn", icon: "📚", label: "Learn" },{ id: "journal", icon: "📖", label: "Diary" },{ id: "identity", icon: "🌱", label: "Identity" },{ id: "calendar", icon: "📅", label: "Calendar" }];
+        const items = [{ id: "today", icon: "🏠", label: "Today" },{ id: "learn", icon: "📚", label: "Learn" },{ id: "journal", icon: "📖", label: "Diary" },{ id: "identity", icon: "🌱", label: "Become" },{ id: "calendar", icon: "📅", label: "Calendar" }];
         return `<nav class="bottom-nav" role="navigation" aria-label="Main navigation">${items.map(item => `<button class="nav-item ${item.id === active ? "active" : ""}" onclick="App.navigate('${item.id}')" aria-current="${item.id === active ? "page" : "false"}"><span class="nav-icon">${item.icon}</span><span class="nav-label">${item.label}</span></button>`).join("")}</nav>`;
     },
 
@@ -323,12 +323,12 @@ const UI = {
     },
 
     loginPage() {
-        return `<div class="login-page"><h1>Identity OS</h1><input id="loginEmail" type="email" placeholder="Email" aria-label="Email"><input id="loginPassword" type="password" placeholder="Password" aria-label="Password"><button class="btn btn-primary" onclick="UI.login()">Sign In</button><button class="google-btn" onclick="UI.loginWithGoogle()"><span>🔵</span><span>Sign in with Google</span></button><p style="margin-top:16px;text-align:center;"><a href="#" onclick="event.preventDefault(); UI.showSignup();">Create an account</a></p></div>`;
+        return `<div class="login-page"><h1>Become</h1><input id="loginEmail" type="email" placeholder="Email" aria-label="Email"><input id="loginPassword" type="password" placeholder="Password" aria-label="Password"><button class="btn btn-primary" onclick="UI.login()">Sign In</button><button class="google-btn" onclick="UI.loginWithGoogle()"><span>🔵</span><span>Sign in with Google</span></button><p style="margin-top:16px;text-align:center;"><a href="#" onclick="event.preventDefault(); UI.showSignup();">Create an account</a></p></div>`;
     },
 
     onboarding() {
         const identities = State.identities.map(i => `<div class="identity-option"><div>${Helpers.escapeHtml(i.name)}</div><button onclick="App.selectIdentity(${i.id})" aria-label="Select ${Helpers.escapeHtml(i.name)}">✓</button></div>`).join("");
-        return `<div class="login-page"><h1>Identity OS</h1><div class="identity-list">${identities}${State.identities.length === 0 ? '' : ''}<div class="identity-option" style="cursor:pointer;" onclick="App.createIdentity()"><div>+ Add Identity</div></div></div></div>`;
+        return `<div class="login-page"><h1>Become</h1><div class="identity-list">${identities}${State.identities.length === 0 ? '' : ''}<div class="identity-option" style="cursor:pointer;" onclick="App.createIdentity()"><div>+ Add Identity</div></div></div></div>`;
     },
 
     lessonDetail(id) {
@@ -344,7 +344,7 @@ const UI = {
     closeSignup() { const sheet = document.getElementById('signupSheet'); if (sheet) { sheet.classList.remove('show'); setTimeout(() => sheet.classList.add('hidden'), 250); } },
     async login() { const email = document.getElementById('loginEmail')?.value.trim(); const password = document.getElementById('loginPassword')?.value.trim(); if (!email || !password) { UI.showToast('Enter email and password.'); return; } const result = await window.login(email, password); if (result.error) { UI.showToast(result.error); return; } location.reload(); },
     async signup() { const email = document.getElementById('signupEmail')?.value.trim(); const password = document.getElementById('signupPassword')?.value.trim(); const confirm = document.getElementById('signupConfirm')?.value.trim(); if (!email) { UI.showToast('Enter your email.'); return; } if (!password) { UI.showToast('Enter your password.'); return; } if (password !== confirm) { UI.showToast('Passwords do not match.'); return; } const result = await createAccount(email, password); if (result.error) { UI.showToast(result.error); return; } UI.showToast('Account created. Check your email.'); this.closeSignup(); },
-    signupSheet() { return `<div id="signupSheet" class="bottom-sheet hidden"><div class="sheet-handle"></div><h2>Create Account</h2><input id="signupEmail" type="email" placeholder="Email"><input id="signupPassword" type="password" placeholder="Password"><input id="signupConfirm" type="password" placeholder="Confirm Password"><div class="sheet-actions"><button class="btn btn-primary" onclick="UI.signup()">Create Account</button><button class="btn btn-secondary" onclick="UI.closeSignup()">Cancel</button></div></div>`; },
+    signupSheet() { return `<div id="signupSheet" class="bottom-sheet hidden"><div class="sheet-handle"></div><h2>Get Started</h2><input id="signupEmail" type="email" placeholder="Email"><input id="signupPassword" type="password" placeholder="Password"><input id="signupConfirm" type="password" placeholder="Confirm Password"><div class="sheet-actions"><button class="btn btn-primary" onclick="UI.signup()">Get Started</button><button class="btn btn-secondary" onclick="UI.closeSignup()">Cancel</button></div></div>`; },
     showToast(message) { const toast = document.createElement('div'); toast.className = 'toast'; toast.textContent = message; toast.setAttribute('role', 'alert'); toast.setAttribute('aria-live', 'polite'); document.body.appendChild(toast); requestAnimationFrame(() => toast.classList.add('show')); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000); },
     showUpdateBanner(worker) { const banner = document.createElement('div'); banner.className = 'update-banner'; banner.innerHTML = `<span>Update available</span><button onclick="worker.postMessage({type:'SKIP_WAITING'}); this.parentElement.remove()">Refresh</button>`; document.body.appendChild(banner); }
 };

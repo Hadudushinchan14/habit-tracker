@@ -426,7 +426,7 @@ const App = {
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `habit-tracker-export-${Helpers.todayISO()}.json`; a.click();
+        a.href = url; a.download = `become-export-${Helpers.todayISO()}.json`; a.click();
         URL.revokeObjectURL(url);
         UI.showToast("Data exported");
     },
