@@ -19,11 +19,12 @@ const Helpers = {
         return "Good Evening";
     },
     quote() {
+        const today = Helpers.todayISO();
+        const [year, month, day] = today.split("-").map(Number);
+        const startOfYear = new Date(year, 0, 1);
+        const currentDate = new Date(year, month - 1, day);
+        const diff = Math.floor((currentDate - startOfYear) / 86400000);
         const quotes = ["Every action is a vote for the person you want to become.", "You do not rise to your goals. You fall to your systems.", "Small habits create remarkable results.", "Your identity is built one action at a time."];
-        const tz = State.userTimezone || 'UTC';
-        const now = new Date();
-        const yearStart = new Date(new Intl.DateTimeFormat('en-CA', {timeZone: tz, year: 'numeric'}).format(now));
-        const diff = Math.floor((now - yearStart) / 86400000);
         return quotes[diff % quotes.length];
     },
     todayISO() {

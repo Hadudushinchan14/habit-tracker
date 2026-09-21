@@ -34,7 +34,7 @@ const App = {
         if (!title) { UI.showToast("Create your habit first"); return; }
 
         const dd = lesson.designDefaults || {};
-        const isCounterType = ["count", "duration", "quantity"].includes(lesson.type);
+        const isCounterType = lesson.type === 'limit' || ["count", "duration", "quantity"].includes(lesson.type);
         const habitData = {
             profile_id: State.profile.id,
             identity_id: State.currentIdentityId,
@@ -113,13 +113,21 @@ const App = {
             State.history = State.history.filter(h => h.id !== existing.id);
         } else {
             const value = action.habit_type === "count" || action.habit_type === "duration" || action.habit_type === "quantity" ? (action.target || 1) : null;
+            const version = this._getCompletionVersion(action);
             const { data, error } = await supabaseClient.from("history").insert({
-                profile_id: State.profile.id, identity_id: State.currentIdentityId, action_id: id, date: today, value
+                profile_id: State.profile.id, identity_id: State.currentIdentityId, action_id: id, date: today, value, version
             }).select().single();
             if (error) { console.error(error); UI.showToast("Failed to complete"); return; }
             State.history.push(data);
         }
         this.render();
+    },
+
+    _getCompletionVersion(action) {
+        const today = Helpers.todayISO();
+        const wasMissedYesterday = this.wasHabitMissedYesterday(action);
+        if (wasMissedYesterday && action.minimum) return "minimum";
+        return "normal";
     },
 
     async changeCounter(id, delta) {
@@ -140,8 +148,9 @@ const App = {
             if (error) { console.error(error); UI.showToast("Failed to save"); return; }
             existing.value = value;
         } else {
+            const version = this._getCompletionVersion(action);
             const { data, error } = await supabaseClient.from("history").insert({
-                profile_id: State.profile.id, identity_id: State.currentIdentityId, action_id: id, date: today, value
+                profile_id: State.profile.id, identity_id: State.currentIdentityId, action_id: id, date: today, value, version
             }).select().single();
             if (error) { console.error(error); UI.showToast("Failed to save"); return; }
             State.history.push(data);
@@ -160,7 +169,7 @@ const App = {
             title: formData.get('habitTitle')?.trim(),
             subtitle: formData.get('habitWhy')?.trim(),
             habit_type: formData.get('habitType') || 'binary',
-            is_counter: ['count', 'duration', 'quantity'].includes(formData.get('habitType')),
+            is_counter: formData.get('habitType') === 'limit' || ['count', 'duration', 'quantity'].includes(formData.get('habitType')),
             target: formData.get('target') ? parseInt(formData.get('target')) : null,
             unit: formData.get('unit') || '',
             time: formData.get('time') || '',
@@ -380,7 +389,19 @@ const App = {
         const struggling = habitSummaries.filter(h => h.completionRate < 0.5).sort((a,b) => a.completionRate - b.completionRate)[0];
         const minVersionUsage = history.filter(h => h.value && h.value > 0).length;
         const totalCompletions = history.length;
-        const missed = actions.filter(a => { const todayComp = history.some(h => h.action_id === a.id && h.date === today); return !todayComp && a.days && a.days.includes((new Date(today + "T00:00:00").getDay() + 6) % 7); }).length;
+        const missed = actions.reduce((total, a) => {
+            if (!a.days || !a.days.length) return total;
+            let actionMissed = 0;
+            for (let d = 0; d < 7; d++) {
+                const dayDate = Helpers.addDays(today, -d);
+                const dayIndex = (new Date(dayDate + "T00:00:00").getDay() + 6) % 7;
+                if (a.days.includes(dayIndex)) {
+                    const wasCompleted = history.some(h => h.action_id === a.id && h.identity_id === State.currentIdentityId && h.date === dayDate);
+                    if (!wasCompleted) actionMissed++;
+                }
+            }
+            return total + actionMissed;
+        }, 0);
         const reflections = State.reflections.filter(r => r.identity_id === State.currentIdentityId && r.reflection_date >= weekStart);
 
         return {
@@ -415,6 +436,11 @@ const App = {
     async deleteAccount() {
         const user = await getUser();
         if (!user) return;
+        // Safety: verify authentication before deletion
+        if (!State.profile.id) { UI.showToast("Cannot delete: no profile loaded"); return; }
+        // Cascade delete all user data
+        // WARNING: This depends on RLS enforcing ownership. If RLS is not configured,
+        // these deletes could affect other users' data. Verify RLS policies before deploying.
         await supabaseClient.from("history").delete().eq("profile_id", State.profile.id);
         await supabaseClient.from("reflections").delete().eq("profile_id", State.profile.id);
         await supabaseClient.from("actions").delete().eq("profile_id", State.profile.id);
