@@ -524,6 +524,102 @@ const UI = {
         `;
     },
 
+    loginPage() {
+        return `
+        <div class="login-page">
+            <img class="login-logo" src="assets/icons/icon-192.png" alt="Logo">
+            <h1>Identity OS</h1>
+            <p class="login-subtitle">Build your identity one day at a time.</p>
+            <input id="loginEmail" type="email" placeholder="Email">
+            <input id="loginPassword" type="password" placeholder="Password">
+            <button class="primary-button" onclick="UI.login()">Login</button>
+            <button class="secondary-button" onclick="UI.openSignup()">Create Account</button>
+            <button class="google-btn" onclick="loginWithGoogle()">Continue with <span class="google-brand">Google</span></button>
+            ${this.signupSheet()}
+        </div>
+        `;
+    },
+
+    openSignup() {
+        const sheet = document.getElementById("signupSheet");
+        if (!sheet) return;
+        sheet.classList.remove("hidden");
+        setTimeout(() => sheet.classList.add("show"), 10);
+    },
+
+    closeSignup() {
+        const sheet = document.getElementById("signupSheet");
+        if (!sheet) return;
+        sheet.classList.remove("show");
+        setTimeout(() => sheet.classList.add("hidden"), 250);
+    },
+
+    async login() {
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value.trim();
+
+        if (!email || !password) {
+            UI.showToast("Enter email and password.");
+            return;
+        }
+
+        const result = await window.login(email, password);
+
+        if (result.error) {
+            UI.showToast(result.error);
+            return;
+        }
+
+        location.reload();
+    },
+
+    async signup() {
+        const email = document.getElementById("signupEmail").value.trim();
+        const password = document.getElementById("signupPassword").value.trim();
+        const confirm = document.getElementById("signupConfirm").value.trim();
+
+        if (!email) {
+            UI.showToast("Enter your email.");
+            return;
+        }
+
+        if (!password) {
+            UI.showToast("Enter your password.");
+            return;
+        }
+
+        if (password !== confirm) {
+            UI.showToast("Passwords do not match.");
+            return;
+        }
+
+        const result = await createAccount(email, password);
+
+        if (result.error) {
+            UI.showToast(result.error);
+            return;
+        }
+
+        UI.showToast("Account created. Check your email.");
+        this.closeSignup();
+    },
+
+    signupSheet() {
+        return `
+        <div id="signupSheet" class="bottom-sheet hidden">
+            <div class="sheet-handle"></div>
+            <h2>Create Account</h2>
+            <input id="signupEmail" type="email" placeholder="Email">
+            <input id="signupPassword" type="password" placeholder="Password">
+            <input id="signupConfirm" type="password" placeholder="Confirm Password">
+            <div class="sheet-actions">
+                <button class="primary-button" onclick="UI.signup()">Create Account</button>
+                <button class="secondary-button" onclick="UI.closeSignup()">Cancel</button>
+            </div>
+        </div>
+        `;
+    },
+
     showToast(message) {
         const toast = document.createElement('div');
         toast.className = 'toast';
