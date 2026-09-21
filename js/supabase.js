@@ -15,11 +15,24 @@ async function getProfile() {
     const user = await getUser();
     if (!user) return null;
     if (!user.email) return null;
-    const { data: profile, error } = await supabaseClient
+    let { data: profile, error } = await supabaseClient
         .from("profiles")
         .upsert({ user_id: user.id, email: user.email, identity: null, timezone: State.userTimezone || 'UTC' }, { onConflict: "user_id", ignoreDuplicates: false })
         .select()
         .single();
+    if (error) {
+        if (error.code === 'PGRST204' || (error.message && error.message.includes('timezone'))) {
+            // Timezone column missing in schema — retry without timezone
+            console.warn("getProfile: timezone column missing, retrying without timezone");
+            const retry = await supabaseClient
+                .from("profiles")
+                .upsert({ user_id: user.id, email: user.email, identity: null }, { onConflict: "user_id", ignoreDuplicates: false })
+                .select()
+                .single();
+            profile = retry.data;
+            error = retry.error;
+        }
+    }
     if (error) {
         console.error("getProfile upsert error:", error);
         const { data: existing } = await supabaseClient.from("profiles").select("*").eq("user_id", user.id).maybeSingle();

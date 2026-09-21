@@ -100,15 +100,15 @@ const UI = {
 
         let recoveryHtml = "";
         if (overdueActions.length > 0) {
-            recoveryHtml = `<div class="recovery-section"><div class="section-header"><h2>Recovery</h2></div><p class="recovery-intro">You missed some habits yesterday. Return with the minimum version:</p>${overdueActions.map(action => `<div class="recovery-card"><h3>${Helpers.escapeHtml(action.title)}</h3><p>Missed yesterday — return small</p>${action.minimum ? `<button class="btn btn-primary" onclick="App.toggleAction(${action.id})">${Helpers.escapeHtml(action.minimum)}</button>` : `<button class="btn btn-primary" onclick="App.toggleAction(${action.id})">Complete now</button>`}</div>`).join("")}</div>`;
+            recoveryHtml = `<div class="recovery-section"><div class="section-header"><h2>Recovery</h2><p class="recovery-intro">You missed some habits yesterday. Start with the minimum:</p></div>${overdueActions.map(action => `<div class="recovery-card"><div class="recovery-card-header"><h3>${Helpers.escapeHtml(action.title)}</h3><span class="badge badge-outline">${Helpers.escapeHtml(action.minimum || 'minimum')}</span></div><button class="btn btn-primary" onclick="App.toggleAction(${action.id})">Do minimum</button></div>`).join("")}</div>`;
         }
 
         let intelHtml = "";
-        if (recommendations.length > 0 && recommendations.length <= 3) {
+        if (recommendations.length > 0) {
             intelHtml = `<div class="intelligence-section"><div class="section-header"><h2>Suggestions</h2></div>${recommendations.slice(0, 3).map(r => `<div class="intel-card"><p>${Helpers.escapeHtml(r.message)}</p><small>${Helpers.escapeHtml(r.suggestedAction)}</small></div>`).join("")}</div>`;
         }
 
-        return `<div class="container"><div class="hero"><p class="greeting">${Helpers.greeting()}</p><h1 class="headline">Who are you becoming today?</h1><p class="daily-quote">${Helpers.quote()}</p></div>${UI.identityCard(State.profile.identity)}<button class="btn btn-secondary" onclick="App.changeIdentity()">Change Identity</button>${UI.progressRing(completedToday, activeActions.length)}<div class="section-header"><h2>Today's Actions</h2><span>${completedToday} / ${activeActions.length}</span></div>${recoveryHtml}${intelHtml}${activeActions.map(action => { const completed = State.history.some(h => h.action_id === action.id && h.identity_id === State.currentIdentityId && h.date === today); return UI.actionRow({ ...action, completed }); }).join("")}${activeActions.length === 0 ? '<div class="empty-state"><p>No actions scheduled for today. Add habits in the builder.</p></div>' : ''}${UI.button("+ New Action", "btn btn-primary", "App.openSheet()")}${UI.addActionSheet()}</div>${UI.bottomNav("today")}`;
+        return `<div class="container">${UI.identityCard(State.profile.identity)}<div class="progress-ring-container">${UI.progressRing(completedToday, activeActions.length)}</div><div class="section-header"><h2>Today's Actions</h2><span>${completedToday} / ${activeActions.length}</span></div>${recoveryHtml}${activeActions.length === 0 ? '<div class="empty-state"><p>No actions scheduled for today.</p><p class="empty-hint">Add habits in the builder to get started.</p></div>' : ''}${activeActions.map(action => { const completed = State.history.some(h => h.action_id === action.id && h.identity_id === State.currentIdentityId && h.date === today); return UI.actionRow({ ...action, completed }); }).join("")}${intelHtml}${UI.button("+ New Action", "btn btn-primary", "App.openSheet()")}${UI.addActionSheet()}</div>${UI.bottomNav("today")}`;
     },
 
     identityDashboard() {
@@ -227,7 +227,7 @@ const UI = {
         const tz = State.userTimezone || 'UTC';
         const firstDay = new Date(year, month - 1, 1);
         const lastDay = new Date(year, month, 0);
-        const startDay = new Intl.DateTimeFormat('en-CA', { timeZone: tz, weekday: 'numeric' }).format(firstDay) - 1;
+        const startDay = new Date(year, month - 1, 1).getDay();
         const daysInMonth = lastDay.getDate();
         const today = Helpers.todayISO();
         const completionsByDate = {};

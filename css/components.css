@@ -550,6 +550,31 @@ label { font-size: 0.875rem; font-weight: 600; color: var(--text); display: bloc
 .identity-option:last-child { justify-content: center; color: var(--brand); font-weight: 700; border-style: dashed; }
 
 /* ==========================
+   Today Identity Card
+   ========================== */
+.identity-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    margin-bottom: var(--space-4);
+    text-align: center;
+}
+.identity-card .identity-label {
+    font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.04em;
+}
+.identity-card .identity-title {
+    font-size: 1.125rem; font-weight: 700; color: var(--text);
+}
+.identity-card .identity-quote {
+    font-size: 0.8125rem; color: var(--text-light); margin-top: 2px;
+}
+
+/* ==========================
    Recovery Banner
    ========================== */
 .recovery-banner {
@@ -660,6 +685,7 @@ label { font-size: 0.875rem; font-weight: 600; color: var(--text); display: bloc
 .badge-success { background: var(--success-light); color: var(--success); }
 .badge-warning { background: var(--warning-light); color: var(--warning); }
 .badge-danger { background: var(--danger-light); color: var(--danger); }
+.badge-outline { background: transparent; color: var(--brand); border: 1px solid var(--brand); }
 
 .divider { height: 1px; background: var(--border); margin: var(--space-4) 0; }
 
@@ -729,9 +755,11 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   border-radius: var(--radius-lg); padding: var(--space-4);
   margin-bottom: var(--space-3);
 }
+.recovery-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); }
 .recovery-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
 .recovery-card p { font-size: 0.8125rem; color: var(--text-light); margin-bottom: var(--space-3); }
 .recovery-intro { font-size: 0.875rem; color: var(--text-light); margin-bottom: var(--space-4); }
+.empty-hint { font-size: 0.8125rem; color: var(--text-muted); margin-top: 4px; }
 
 /* ==========================
    Intelligence / Recommendations
