@@ -32,11 +32,41 @@ const UI = {
         return `<nav class="bottom-nav" role="navigation" aria-label="Main navigation">${items.map(item => `<button class="nav-item ${item.id === active ? "active" : ""}" onclick="App.navigate('${item.id}')" aria-current="${item.id === active ? "page" : "false"}"><span class="nav-icon">${item.icon}</span><span class="nav-label">${item.label}</span></button>`).join("")}</nav>`;
     },
 
-    progressRing(completed, total) {
+    todayPerformance(completed, total) {
         const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-        const circumference = 2 * Math.PI * 32;
+        const circumference = 2 * Math.PI * 36;
         const offset = circumference * (1 - pct / 100);
-        return `<div class="progress-ring" role="progressbar" aria-valuenow="${completed}" aria-valuemin="0" aria-valuemax="${total}" aria-label="${pct}% complete"><svg viewBox="0 0 80 80" width="100%" height="100%"><circle class="progress-bg" cx="40" cy="40" r="32"></circle><circle class="progress-fill" cx="40" cy="40" r="32" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"></circle></svg><div class="progress-ring-inner"><span class="progress-pct">${pct}%</span><span class="progress-fraction">${completed}/${total}</span></div></div>`;
+        const remaining = total - completed;
+        return `<section class="today-performance" aria-label="Today's habit performance">
+            <div class="today-performance-header">
+                <div class="today-performance-title">
+                    <span class="eyebrow">TODAY</span>
+                    <h2>Habit performance</h2>
+                </div>
+            </div>
+            <div class="today-performance-body">
+                <div class="performance-ring">
+                    <svg viewBox="0 0 100 100" class="performance-ring-svg">
+                        <circle class="performance-track" cx="50" cy="50" r="36"></circle>
+                        <circle class="performance-progress" cx="50" cy="50" r="36" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"></circle>
+                    </svg>
+                    <div class="performance-ring-content">
+                        <strong class="performance-percent">${pct}%</strong>
+                        <span class="performance-label">complete</span>
+                    </div>
+                </div>
+                <div class="performance-summary">
+                    <div class="performance-stat">
+                        <strong class="performance-count">${completed} of ${total} habits</strong>
+                        <span class="performance-subtitle">completed today</span>
+                    </div>
+                    ${remaining > 0 ? `<div class="performance-stat">
+                        <span class="performance-remaining">${remaining} remaining</span>
+                        <span class="performance-subtitle">to go</span>
+                    </div>` : ''}
+                </div>
+            </div>
+        </section>`;
     },
 
     addActionSheet() {
@@ -110,7 +140,7 @@ const UI = {
             intelHtml = `<div class="intelligence-section"><div class="section-header"><h2>Suggestions</h2></div>${recommendations.slice(0, 3).map(r => `<div class="intel-card"><p>${Helpers.escapeHtml(r.message)}</p><small>${Helpers.escapeHtml(r.suggestedAction)}</small></div>`).join("")}</div>`;
         }
 
-        return `<div class="container">${UI.identityCard(State.profile.identity)}<div class="progress-ring-container">${UI.progressRing(completedToday, activeActions.length)}</div><div class="section-header"><h2>Today's Actions</h2><span>${completedToday} / ${activeActions.length}</span></div>${recoveryHtml}${activeActions.length === 0 ? '<div class="empty-state"><p>No actions scheduled for today.</p><p class="empty-hint">Add habits in the builder to get started.</p></div>' : ''}${activeActions.map(action => { const completed = State.history.some(h => h.action_id === action.id && h.identity_id === State.currentIdentityId && h.date === today); return UI.actionRow({ ...action, completed }); }).join("")}${intelHtml}${UI.button("+ New Action", "btn btn-primary", "App.openSheet()")}${UI.addActionSheet()}</div>${UI.bottomNav("today")}`;
+        return `<div class="container">${UI.identityCard(State.profile.identity)}<div class="progress-ring-container">${UI.todayPerformance(completedToday, activeActions.length)}</div><div class="section-header"><h2>Today's Actions</h2><span>${completedToday} / ${activeActions.length}</span></div>${recoveryHtml}${activeActions.length === 0 ? '<div class="empty-state"><p>No actions scheduled for today.</p><p class="empty-hint">Add habits in the builder to get started.</p></div>' : ''}${activeActions.map(action => { const completed = State.history.some(h => h.action_id === action.id && h.identity_id === State.currentIdentityId && h.date === today); return UI.actionRow({ ...action, completed }); }).join("")}${intelHtml}${UI.button("+ New Action", "btn btn-primary", "App.openSheet()")}${UI.addActionSheet()}</div>${UI.bottomNav("today")}`;
     },
 
     identityDashboard() {

@@ -301,37 +301,73 @@ label { font-size: 0.875rem; font-weight: 600; color: var(--text); display: bloc
 .stat-card strong { display: block; font-size: 2.25rem; font-weight: 800; color: var(--brand); line-height: 1; letter-spacing: -0.03em; }
 .stat-card p { font-size: 0.8125rem; color: var(--text-light); margin-top: var(--space-1); }
 
-/* ==========================
-   Progress Ring
-   ========================== */
-.progress-ring-container { display: flex; justify-content: center; margin: var(--space-6) 0; }
-.progress-ring {
-  width: 140px; height: 140px; border-radius: 50%;
-  background: var(--surface);
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-}
-.progress-ring svg {
-  position: absolute;
-  width: 100%; height: 100%;
-}
-.progress-ring circle {
-  fill: none; stroke-width: 8px; stroke-linecap: round;
-}
-.progress-ring .progress-bg {
-  stroke: var(--border); stroke-width: 6px;
-}
-.progress-ring .progress-fill {
-  stroke: var(--brand); stroke-width: 8px;
-  transition: stroke-dashoffset 0.5s ease;
-  transform-origin: center;
-  stroke-linecap: round;
-}
-.progress-ring-inner {
-  width: 116px; height: 116px; background: var(--surface); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.75rem; font-weight: 800; color: var(--text); letter-spacing: -0.04em;
-}
+   /* ==========================
+    Today Performance / Analytics
+    ========================== */
+   .today-performance {
+     background: var(--surface);
+     border: 1px solid var(--border);
+     border-radius: var(--radius-lg);
+     padding: var(--space-5);
+     margin: var(--space-4) 0;
+   }
+   .today-performance-header {
+     margin-bottom: var(--space-4);
+   }
+   .today-performance-title {
+     display: flex; align-items: baseline; gap: var(--space-3);
+   }
+   .eyebrow {
+     font-size: 0.6875rem; font-weight: 700; color: var(--text-muted);
+     text-transform: uppercase; letter-spacing: 0.06em;
+   }
+   .today-performance h2 {
+     font-size: 1.125rem; font-weight: 700; color: var(--text); margin: 0;
+   }
+   .today-performance-body {
+     display: flex; align-items: center; gap: var(--space-6);
+   }
+   .performance-ring {
+     position: relative; width: 120px; height: 120px; flex-shrink: 0;
+   }
+   .performance-ring-svg {
+     width: 100%; height: 100%; transform: rotate(-90deg);
+   }
+   .performance-track {
+     fill: none; stroke: var(--border); stroke-width: 8px;
+   }
+   .performance-progress {
+     fill: none; stroke: var(--brand); stroke-width: 8px;
+     stroke-linecap: round; transition: stroke-dashoffset 0.5s ease;
+   }
+   .performance-ring-content {
+     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+     display: flex; flex-direction: column; align-items: center; justify-content: center;
+     pointer-events: none;
+   }
+   .performance-percent {
+     font-size: 1.75rem; font-weight: 800; color: var(--text);
+     line-height: 1; letter-spacing: -0.03em;
+   }
+   .performance-label {
+     font-size: 0.75rem; color: var(--text-muted); font-weight: 500;
+     text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px;
+   }
+   .performance-summary {
+     display: flex; flex-direction: column; gap: var(--space-2);
+   }
+   .performance-stat {
+     display: flex; flex-direction: column;
+   }
+   .performance-count {
+     font-size: 1.25rem; font-weight: 700; color: var(--text); line-height: 1.2;
+   }
+   .performance-subtitle {
+     font-size: 0.75rem; color: var(--text-muted); font-weight: 500;
+   }
+   .performance-remaining {
+     font-size: 0.875rem; font-weight: 600; color: var(--brand); line-height: 1.2;
+   }
 
 /* ==========================
    Identity Dashboard
