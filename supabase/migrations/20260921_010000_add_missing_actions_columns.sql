@@ -1,0 +1,15 @@
+-- Add missing columns to actions table for Phase 3 functionality
+-- These columns are required by the current application code but were missing in the live schema.
+
+ALTER TABLE public.actions
+ADD COLUMN IF NOT EXISTS habit_type TEXT NOT NULL DEFAULT 'binary',
+ADD COLUMN IF NOT EXISTS target INTEGER,
+ADD COLUMN IF NOT EXISTS unit TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS time TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS days JSONB NOT NULL DEFAULT '[]',
+ADD COLUMN IF NOT EXISTS location TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS cue TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS minimum TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS normal TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS stretch TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS environment TEXT NOT NULL DEFAULT '';

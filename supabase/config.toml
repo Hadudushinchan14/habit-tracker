@@ -1,0 +1,8 @@
+[project]
+uri = "https://wjkqnoygmeymqiuatyyt.supabase.co"
+
+[db]
+  schema = "public"
+
+[api]
+  url = "https://wjkqnoygmeymqiuatyyt.supabase.co/rest/v1"
