@@ -16,15 +16,15 @@ const UI = {
             counterDisplay = `<div class="counter-display"><span class="counter-value">${counterValue}</span><span class="counter-target">${displayTarget}</span></div>`;
         }
         let contextHtml = "";
-        if (cue || minimum || normal) {
+        if (cue || minimum || normal || stretch) {
             contextHtml = `<div class="action-context">`;
-            if (cue) contextHtml += `<small>🪝 ${Helpers.escapeHtml(cue)}</small>`;
-            if (minimum) contextHtml += `<small>📉 Min: ${Helpers.escapeHtml(minimum)}</small>`;
-            if (normal) contextHtml += `<small>📊 Normal: ${Helpers.escapeHtml(normal)}</small>`;
-            if (stretch) contextHtml += `<small>🚀 Stretch: ${Helpers.escapeHtml(stretch)}</small>`;
+            if (cue) contextHtml += `<small class="meta-cue">Cue: ${Helpers.escapeHtml(cue)}</small>`;
+            if (minimum) contextHtml += `<small class="meta-min">Min: ${Helpers.escapeHtml(minimum)}</small>`;
+            if (normal) contextHtml += `<small class="meta-norm">Normal: ${Helpers.escapeHtml(normal)}</small>`;
+            if (stretch) contextHtml += `<small class="meta-str">Stretch: ${Helpers.escapeHtml(stretch)}</small>`;
             contextHtml += `</div>`;
         }
-        return `<div class="action-card ${completed ? "completed" : ""}"><div class="action-content"><h3>${safeTitle}</h3>${safeSubtitle ? `<p class="action-subtitle">${safeSubtitle}</p>` : ""}${safeDescription ? `<p class="action-description">${safeDescription}</p>` : ""}${safeLessonTitle ? `<small class="habit-source">Created from: ${safeLessonTitle}</small>` : ""}${contextHtml}${counterDisplay}</div><div class="action-controls"><button class="btn-icon" onclick="App.openSheet(${id})" aria-label="Edit habit">✏️</button>${is_counter ? `<div class="counter-box"><button onclick="App.changeCounter(${id}, -1)" aria-label="Decrement">−</button><input id="counter-${id}" type="number" value="${counterValue}" min="0" aria-label="Current count"><button onclick="App.changeCounter(${id}, 1)" aria-label="Increment">+</button><button onclick="App.saveCounterFromInput(${id})">Save</button></div>` : `<button class="vote-btn ${completed ? "completed" : ""}" onclick="App.toggleAction(${id})" aria-label="${completed ? "Mark incomplete" : "Mark complete"}">${completed ? "✓" : "○"}</button>`}</div></div>`;
+        return `<div class="action-card ${completed ? "completed" : ""}"><div class="action-content"><h3>${safeTitle}</h3>${safeSubtitle ? `<p class="action-subtitle">${safeSubtitle}</p>` : ""}${safeDescription ? `<p class="action-description">${safeDescription}</p>` : ""}${safeLessonTitle ? `<small class="habit-source">Created from: ${safeLessonTitle}</small>` : ""}${contextHtml}${counterDisplay}</div><div class="action-controls"><button class="btn-icon" onclick="App.openSheet(${id})" aria-label="Edit habit">Edit</button>${is_counter ? `<div class="counter-box"><button onclick="App.changeCounter(${id}, -1)" aria-label="Decrement">−</button><input id="counter-${id}" type="number" value="${counterValue}" min="0" aria-label="Current count"><button onclick="App.changeCounter(${id}, 1)" aria-label="Increment">+</button><button onclick="App.saveCounterFromInput(${id})">Save</button></div>` : `<button class="vote-btn ${completed ? "completed" : ""}" onclick="App.toggleAction(${id})" aria-label="${completed ? "Mark incomplete" : "Mark complete"}">${completed ? "Done" : "○"}</button>`}</div></div>`;
     },
 
     bottomNav(active = "today") {
@@ -140,7 +140,7 @@ const UI = {
             intelHtml = `<div class="intelligence-section"><div class="section-header"><h2>Suggestions</h2></div>${recommendations.slice(0, 3).map(r => `<div class="intel-card"><p>${Helpers.escapeHtml(r.message)}</p><small>${Helpers.escapeHtml(r.suggestedAction)}</small></div>`).join("")}</div>`;
         }
 
-        return `<div class="container"><div class="today-hero"><div class="today-date">${Helpers.formatDate(Helpers.parseISODate(today), { weekday: 'long', month: 'long', day: 'numeric' })}</div><div class="today-performance">${UI.todayPerformance(completedToday, activeActions.length)}</div></div><div class="section-header"><h2>Today's Actions</h2><span class="action-count">${completedToday} of ${activeActions.length} done</span></div>${recoveryHtml}${activeActions.length === 0 ? '<div class="empty-state"><p>No actions scheduled for today.</p><p class="empty-hint">Add habits in the builder to get started.</p></div>' : ''}${activeActions.map(action => { const completed = State.history.some(h => h.action_id === action.id && h.identity_id === State.currentIdentityId && h.date === today); return UI.actionRow({ ...action, completed }); }).join("")}${intelHtml}${UI.button("+ New Action", "btn btn-primary", "App.openSheet()")}${UI.addActionSheet()}</div>${UI.bottomNav("today")}`;
+        return `<div class="container"><div class="today-hero"><div class="today-date">${Helpers.formatDate(Helpers.parseISODate(today), { weekday: 'long', month: 'long', day: 'numeric' })}</div>${UI.todayPerformance(completedToday, activeActions.length)}</div><div class="section-header"><h2>Today's Actions</h2><span class="action-count">${completedToday} of ${activeActions.length} done</span></div>${recoveryHtml}${activeActions.length === 0 ? '<div class="empty-state"><p>No actions scheduled for today.</p><p class="empty-hint">Add habits in the builder to get started.</p></div>' : ''}${activeActions.map(action => { const completed = State.history.some(h => h.action_id === action.id && h.identity_id === State.currentIdentityId && h.date === today); return UI.actionRow({ ...action, completed }); }).join("")}${intelHtml}${UI.button("+ New Action", "btn btn-primary", "App.openSheet()")}${UI.addActionSheet()}</div>${UI.bottomNav("today")}`;
     },
 
     identityDashboard() {
