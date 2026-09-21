@@ -34,7 +34,9 @@ const UI = {
 
     progressRing(completed, total) {
         const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-        return `<div class="progress-ring" role="progressbar" aria-valuenow="${completed}" aria-valuemin="0" aria-valuemax="${total}"><svg width="80" height="80"><circle class="progress-bg" cx="40" cy="40" r="32"></circle><circle class="progress-fill" cx="40" cy="40" r="32" stroke-dasharray="${2 * Math.PI * 32}" stroke-dashoffset="${2 * Math.PI * 32 * (1 - pct / 100)}" style="transition: stroke-dashoffset 0.5s ease;"></circle></svg><div class="progress-text"><span class="progress-pct">${pct}%</span><span class="progress-fraction">${completed}/${total}</span></div></div>`;
+        const circumference = 2 * Math.PI * 32;
+        const offset = circumference * (1 - pct / 100);
+        return `<div class="progress-ring" role="progressbar" aria-valuenow="${completed}" aria-valuemin="0" aria-valuemax="${total}" aria-label="${pct}% complete"><svg viewBox="0 0 80 80" width="100%" height="100%"><circle class="progress-bg" cx="40" cy="40" r="32"></circle><circle class="progress-fill" cx="40" cy="40" r="32" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"></circle></svg><div class="progress-ring-inner"><span class="progress-pct">${pct}%</span><span class="progress-fraction">${completed}/${total}</span></div></div>`;
     },
 
     addActionSheet() {
@@ -232,17 +234,24 @@ const UI = {
         const today = Helpers.todayISO();
         const completionsByDate = {};
         State.history.filter(h => h.identity_id === State.currentIdentityId).forEach(h => { if (!completionsByDate[h.date]) completionsByDate[h.date] = 0; completionsByDate[h.date]++; });
-        let html = `<div class="calendar-header"><button onclick="UI.renderCalendar(${year}, ${month - 1})" aria-label="Previous month">‹</button><h3>${new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(firstDay)}</h3><button onclick="UI.renderCalendar(${year}, ${month + 1})" aria-label="Next month">›</button></div><table class="calendar" role="grid"><thead><tr>${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<th scope="col">${d}</th>`).join('')}</tr></thead><tbody><tr>`;
-        for (let i = 0; i < startDay; i++) html += '<td class="empty"></td>';
+        let html = `<div class="calendar-header"><button class="calendar-nav-btn" onclick="UI.renderCalendar(${year}, ${month - 1})" aria-label="Previous month">‹</button><h3>${new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(firstDay)}</h3><button class="calendar-nav-btn" onclick="UI.renderCalendar(${year}, ${month + 1})" aria-label="Next month">›</button></div><div class="calendar-grid" role="grid">`;
+        for (const d of ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']) {
+            html += `<div class="calendar-day-header" role="columnheader">${d}</div>`;
+        }
+        for (let i = 0; i < startDay; i++) {
+            html += '<div class="calendar-day empty"></div>';
+        }
         for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const count = completionsByDate[dateStr] || 0;
             const isToday = dateStr === today;
             const isPast = dateStr < today;
-            html += `<td class="${isToday ? "today" : ""} ${isPast ? "past" : ""} ${count > 0 ? "has-completion" : ""}" data-date="${dateStr}" onclick="App.openDayModal('${dateStr}')"><span class="day-number">${day}</span>${count > 0 ? `<span class="completion-count">${count}</span>` : ''}</td>`;
-            if ((startDay + day) % 7 === 0 && day !== daysInMonth) html += '</tr><tr>';
+            const classes = ['calendar-day'];
+            if (isToday) classes.push('today');
+            if (count > 0) classes.push('completed');
+            html += `<div class="${classes.join(' ')}" data-date="${dateStr}" role="gridcell" tabindex="0" onclick="App.openDayModal('${dateStr}')"><span class="day-number">${day}</span>${count > 0 ? `<span class="completion-count">${count}</span>` : ''}</div>`;
         }
-        html += '</tr></tbody></table>';
+        html += '</div>';
         return html;
     },
 
